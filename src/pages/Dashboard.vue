@@ -11,7 +11,9 @@ import OutfitItem from '../components/OutfitItem.vue'
 import CameraCapture from '../components/CameraCapture.vue'
 import LAYERS from '../data/outfits.js'
 
-const emit = defineEmits(['go-landing'])
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 /* -------------------------------------------------------------------------- */
 /*  Reactive state                                                            */
@@ -198,7 +200,7 @@ function toggleCamera() {
     <header class="sticky top-0 z-30 backdrop-blur-md bg-cream/70 border-b border-espresso/5">
       <div class="mx-auto max-w-7xl px-5 sm:px-8 py-4 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <button @click="emit('go-landing')" class="flex items-center gap-2.5 hover:opacity-80 transition">
+          <button @click="router.push('/')" class="flex items-center gap-2.5 hover:opacity-80 transition">
             <div class="h-9 w-9 rounded-xl bg-tan text-cream grid place-items-center shadow-soft">
               <Sparkles :size="18" />
             </div>
