@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # VirtualCloset — The Clueless Experience
 
 Sebuah *prototype* aplikasi (Vue 3) untuk alat bantu memilih pakaian yang terinspirasi dari gaya film *Clueless*. Aplikasi ini memiliki estetika "Cewek Bumi" (warna-warna tanah yang hangat), terasa premium, dan memiliki fitur andalan **Clueless Slider** untuk memadupadankan (mix-and-match) tiga lapisan pakaian.
