@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body {
+  background: #FDF7ED;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Subtle grain so the cream doesn't feel flat */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(rgba(75,54,33,0.035) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: multiply;
+  opacity: 0.6;
+}
+
+#app { position: relative; z-index: 1; }
+
+/* Hide scrollbars on the slider rails */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Smooth, inertia-style scroll */
+.snap-rail {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scroll-behavior: smooth;
+}
+
+.snap-rail > * {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+/* Entrance utility */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 800ms cubic-bezier(0.22, 1, 0.36, 1), transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Card lift micro-animation */
+.lift {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 500ms cubic-bezier(0.22, 1, 0.36, 1), filter 500ms ease;
+  will-change: transform;
+}
+
+/* Center fade for slider edges */
+.fade-edges {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 12%, #000 88%, transparent 100%);
+}
+
+/* Press effect for buttons */
+.press {
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease, background-color 220ms ease;
+}
+.press:active { transform: translateY(1px) scale(0.985); }
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce) {
+  .snap-rail { scroll-behavior: auto; }
+  .reveal { transition: none; opacity: 1; transform: none; }
+}
