@@ -320,76 +320,110 @@ function toggleCamera() {
           </div>
         </div>
 
-        <!-- Each layer -->
-        <div class="space-y-5">
-          <div
-            v-for="(layer, idx) in state"
-            :key="layer.key"
-            class="reveal rounded-3xl bg-white/60 backdrop-blur-sm border border-espresso/5 shadow-soft overflow-hidden"
-          >
-            <!-- Header row -->
-            <div class="flex items-center justify-between px-5 sm:px-6 pt-4">
-              <div class="flex items-center gap-3">
-                <span class="grid place-items-center h-7 w-7 rounded-full bg-beige text-espresso text-xs font-semibold">{{ idx + 1 }}</span>
-                <h3 class="font-display text-lg sm:text-xl">{{ layer.label }}</h3>
-                <span class="hidden sm:inline text-xs text-espresso-soft">· {{ layer.items[layer.activeIndex]?.label }}</span>
-              </div>
+        <!-- Slider & Preview Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          <!-- Left: Sliders (8 columns on large screens) -->
+          <div class="lg:col-span-7 space-y-5">
+            <div
+              v-for="(layer, idx) in state"
+              :key="layer.key"
+              class="reveal rounded-3xl bg-white/60 backdrop-blur-sm border border-espresso/5 shadow-soft overflow-hidden"
+            >
+              <!-- Header row -->
+              <div class="flex items-center justify-between px-5 sm:px-6 pt-4">
+                <div class="flex items-center gap-3">
+                  <span class="grid place-items-center h-7 w-7 rounded-full bg-beige text-espresso text-xs font-semibold">{{ idx + 1 }}</span>
+                  <h3 class="font-display text-lg sm:text-xl">{{ layer.label }}</h3>
+                  <span class="hidden sm:inline text-xs text-espresso-soft">· {{ layer.items[layer.activeIndex]?.label }}</span>
+                </div>
 
-              <button
-                @click="toggleLock(idx)"
-                :aria-pressed="layer.locked"
-                :class="[
-                  'press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors duration-300',
-                  layer.locked
-                    ? 'bg-espresso text-cream border-espresso shadow-soft'
-                    : 'bg-cream text-espresso-soft border-espresso/10 hover:border-tan/50 hover:text-espresso'
-                ]"
-              >
-                <component :is="layer.locked ? Lock : LockOpen" :size="13" />
-                {{ layer.locked ? 'Locked' : 'Lock' }}
-              </button>
-            </div>
-
-            <!-- The rail -->
-            <div class="relative mt-3 pb-5">
-              <!-- Center indicator -->
-              <div class="pointer-events-none absolute inset-y-3 left-1/2 -translate-x-1/2 w-[clamp(140px,22vw,210px)] rounded-3xl ring-1 ring-tan/30 ring-offset-0"></div>
-
-              <div
-                :ref="el => setRailRef(el, idx)"
-                @scroll="onScroll(idx)"
-                class="snap-rail no-scrollbar fade-edges flex gap-4 overflow-x-auto px-[max(50%-105px,1rem)] sm:px-[max(50%-110px,1.5rem)]"
-              >
                 <button
-                  v-for="(item, i) in layer.items"
-                  :key="item.id"
-                  @click="selectItem(idx, i)"
-                  :aria-label="`Select ${item.label}`"
-                  class="lift shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tan rounded-3xl"
+                  @click="toggleLock(idx)"
+                  :aria-pressed="layer.locked"
                   :class="[
-                    'w-[clamp(140px,22vw,210px)] aspect-[3/4]',
-                    layer.activeIndex === i
-                      ? 'scale-[1.04] shadow-card'
-                      : 'scale-[0.92] opacity-70 hover:opacity-100 hover:scale-[0.98]'
+                    'press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-colors duration-300',
+                    layer.locked
+                      ? 'bg-espresso text-cream border-espresso shadow-soft'
+                      : 'bg-cream text-espresso-soft border-espresso/10 hover:border-tan/50 hover:text-espresso'
                   ]"
                 >
-                  <OutfitItem :item="item" :active="layer.activeIndex === i" />
+                  <component :is="layer.locked ? Lock : LockOpen" :size="13" />
+                  {{ layer.locked ? 'Locked' : 'Lock' }}
                 </button>
               </div>
 
-              <!-- Dots -->
-              <div class="mt-3 flex justify-center gap-1.5">
-                <span
-                  v-for="(item, i) in layer.items"
-                  :key="item.id + '-dot'"
-                  :class="[
-                    'h-1.5 rounded-full transition-all duration-500 ease-silk',
-                    layer.activeIndex === i ? 'w-6 bg-tan' : 'w-1.5 bg-espresso/15'
-                  ]"
-                ></span>
+              <!-- The rail -->
+              <div class="relative mt-3 pb-5">
+                <!-- Center indicator -->
+                <div class="pointer-events-none absolute inset-y-3 left-1/2 -translate-x-1/2 w-[clamp(140px,22vw,210px)] rounded-3xl ring-1 ring-tan/30 ring-offset-0"></div>
+
+                <div
+                  :ref="el => setRailRef(el, idx)"
+                  @scroll="onScroll(idx)"
+                  class="snap-rail no-scrollbar fade-edges flex gap-4 overflow-x-auto px-[max(50%-105px,1rem)] sm:px-[max(50%-110px,1.5rem)]"
+                >
+                  <button
+                    v-for="(item, i) in layer.items"
+                    :key="item.id"
+                    @click="selectItem(idx, i)"
+                    :aria-label="`Select ${item.label}`"
+                    class="lift shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-tan rounded-3xl"
+                    :class="[
+                      'w-[clamp(140px,22vw,210px)] aspect-[3/4]',
+                      layer.activeIndex === i
+                        ? 'scale-[1.04] shadow-card'
+                        : 'scale-[0.92] opacity-70 hover:opacity-100 hover:scale-[0.98]'
+                    ]"
+                  >
+                    <OutfitItem :item="item" :active="layer.activeIndex === i" />
+                  </button>
+                </div>
+
+                <!-- Dots -->
+                <div class="mt-3 flex justify-center gap-1.5">
+                  <span
+                    v-for="(item, i) in layer.items"
+                    :key="item.id + '-dot'"
+                    :class="[
+                      'h-1.5 rounded-full transition-all duration-500 ease-silk',
+                      layer.activeIndex === i ? 'w-6 bg-tan' : 'w-1.5 bg-espresso/15'
+                    ]"
+                  ></span>
+                </div>
               </div>
             </div>
           </div>
+
+          <!-- Right: Live Preview Stack (5 columns on large screens, sticky on scroll) -->
+          <div class="lg:col-span-5 order-first lg:order-last lg:sticky lg:top-24 space-y-6">
+            <div class="reveal relative w-full max-w-[280px] sm:max-w-sm mx-auto aspect-[3/4] rounded-[2.5rem] bg-gradient-to-b from-white/80 to-beige/50 backdrop-blur-sm shadow-card overflow-hidden border border-white p-4">
+              <!-- Stack of items -->
+              <div class="absolute inset-0 grid grid-rows-3 gap-2 p-3 pb-16">
+                <div class="relative w-full h-full">
+                  <OutfitItem v-if="state[0] && state[0].items[state[0].activeIndex]" :item="state[0].items[state[0].activeIndex]" :active="false" flat />
+                </div>
+                <div class="relative w-full h-full scale-[1.05] z-10 drop-shadow-md">
+                  <OutfitItem v-if="state[1] && state[1].items[state[1].activeIndex]" :item="state[1].items[state[1].activeIndex]" :active="true" flat />
+                </div>
+                <div class="relative w-full h-full">
+                  <OutfitItem v-if="state[2] && state[2].items[state[2].activeIndex]" :item="state[2].items[state[2].activeIndex]" :active="false" flat />
+                </div>
+              </div>
+              
+              <!-- Bottom floating badge -->
+              <div class="absolute bottom-4 left-4 right-4 rounded-2xl bg-white/90 backdrop-blur-md px-4 py-3 text-xs text-espresso-soft border border-white shadow-soft flex items-center justify-between">
+                <div>
+                  <span class="font-semibold text-espresso block">Live Look</span>
+                  <span class="opacity-80 text-[10px] uppercase tracking-wider mt-0.5 block truncate max-w-[150px] sm:max-w-[200px]">{{ currentOutfit }}</span>
+                </div>
+                <div class="h-8 w-8 rounded-full bg-tan/10 grid place-items-center text-tan">
+                  <Sparkles :size="14" />
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- Current outfit summary -->

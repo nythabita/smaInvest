@@ -10,11 +10,33 @@ import {
   Lock,
   Shuffle,
 } from 'lucide-vue-next'
+import { onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import OutfitItem from '../components/OutfitItem.vue'
 import LAYERS from '../data/outfits.js'
 
 const router = useRouter()
+
+/* Reveal-on-scroll (IntersectionObserver) */
+let io
+onMounted(() => {
+  io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-in')
+          io.unobserve(e.target)
+        }
+      })
+    },
+    { threshold: 0.15 }
+  )
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+})
+
+onBeforeUnmount(() => {
+  io && io.disconnect()
+})
 
 function goToDashboard() {
   router.push('/dashboard')
