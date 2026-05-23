@@ -53,6 +53,12 @@ const selectedCategory = ref('tops')
 const customName = ref('')
 const pendingCapturedImage = ref(null)
 const closetItems = ref([])
+const inputMode = ref('camera') // 'camera' | 'upload'
+const uploadError = ref('')
+const fileInputRef = ref(null)
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 /* -------------------------------------------------------------------------- */
 /*  Slider mechanics                                                          */
@@ -218,7 +224,46 @@ function toggleCamera() {
   if (!showCamera.value) {
     pendingCapturedImage.value = null
     customName.value = ''
+    uploadError.value = ''
+    inputMode.value = 'camera'
+    if (fileInputRef.value) {
+      fileInputRef.value.value = ''
+    }
   }
+}
+
+function triggerFileInput() {
+  if (fileInputRef.value) {
+    fileInputRef.value.click()
+  }
+}
+
+function handleFileUpload(event) {
+  uploadError.value = ''
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Validate file type
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    uploadError.value = 'Format file tidak didukung. Gunakan JPG, PNG, atau WebP.'
+    event.target.value = ''
+    return
+  }
+
+  // Validate file size
+  if (file.size > MAX_FILE_SIZE) {
+    const sizeMB = (file.size / 1024 / 1024).toFixed(1)
+    uploadError.value = `File terlalu besar (${sizeMB}MB). Maksimal 5MB.`
+    event.target.value = ''
+    return
+  }
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    pendingCapturedImage.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+  event.target.value = ''
 }
 
 </script>
@@ -249,7 +294,7 @@ function toggleCamera() {
             @click="toggleCamera"
             class="press inline-flex items-center gap-2 rounded-full bg-tan text-espresso px-4 py-2 text-sm font-medium shadow-soft hover:shadow-card hover:bg-tan-soft"
           >
-            Open Camera
+            Add Clothing
           </button>
           <button
             @click="handleLogout"
@@ -261,23 +306,86 @@ function toggleCamera() {
       </div>
     </header>
 
-    <!-- CAMERA OVERLAY -->
-    <div v-if="showCamera" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div class="relative max-w-sm w-full mx-4">
+    <!-- CAMERA / UPLOAD OVERLAY -->
+    <div v-if="showCamera" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+      <!-- Wrapper relative for absolute close button positioning -->
+      <div class="relative max-w-sm w-full mt-8">
         <button
           @click="toggleCamera"
-          class="absolute -top-10 right-0 text-white text-xl"
+          class="absolute -top-12 right-0 text-white text-2xl z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
         >
           ✕
         </button>
 
-        <template v-if="!pendingCapturedImage">
-          <!-- Capture Mode -->
-          <CameraCapture
-            @capture="(imageData) => {
-              pendingCapturedImage = imageData
-            }"
-          />
+        <!-- Inner scrollable area -->
+        <div class="max-h-[80vh] overflow-y-auto no-scrollbar w-full">
+          <template v-if="!pendingCapturedImage">
+          <!-- Input Mode Tabs -->
+          <div class="flex gap-2 mb-4">
+            <button
+              @click="inputMode = 'camera'"
+              :class="[
+                'flex-1 px-4 py-3 rounded-full text-sm font-semibold transition',
+                inputMode === 'camera'
+                  ? 'bg-espresso text-cream shadow-soft'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              ]"
+            >
+              📷 Camera
+            </button>
+            <button
+              @click="inputMode = 'upload'"
+              :class="[
+                'flex-1 px-4 py-3 rounded-full text-sm font-semibold transition',
+                inputMode === 'upload'
+                  ? 'bg-espresso text-cream shadow-soft'
+                  : 'bg-white/20 text-white hover:bg-white/30'
+              ]"
+            >
+              📁 Upload
+            </button>
+          </div>
+
+          <!-- Camera Mode -->
+          <div v-if="inputMode === 'camera'">
+            <CameraCapture
+              @capture="(imageData) => {
+                pendingCapturedImage = imageData
+              }"
+            />
+          </div>
+
+          <!-- Upload Mode -->
+          <div v-else class="bg-white rounded-3xl p-5 sm:p-6 shadow-card">
+            <h3 class="font-display text-xl text-espresso mb-4 text-center">Upload Gambar</h3>
+            
+            <div v-if="uploadError" class="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-sm text-center border border-red-100">
+              {{ uploadError }}
+            </div>
+
+            <!-- Hidden file input -->
+            <input
+              ref="fileInputRef"
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp"
+              class="hidden"
+              @change="handleFileUpload"
+            />
+
+            <!-- Upload drop zone -->
+            <button
+              @click="triggerFileInput"
+              class="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-espresso/20 bg-cream/50 hover:bg-beige/50 transition flex flex-col items-center justify-center gap-4 cursor-pointer"
+            >
+              <div class="h-16 w-16 rounded-full bg-tan/10 grid place-items-center text-tan">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <div class="text-center">
+                <p class="font-semibold text-espresso">Pilih gambar</p>
+                <p class="text-xs text-espresso-soft mt-1">JPG, PNG, WebP · Maks 5MB</p>
+              </div>
+            </button>
+          </div>
         </template>
         
         <template v-else>
@@ -342,6 +450,7 @@ function toggleCamera() {
             </div>
           </div>
         </template>
+        </div>
       </div>
     </div>
  

@@ -5,23 +5,63 @@ const videoRef = ref(null)
 const canvasRef = ref(null)
 const stream = ref(null)
 
-const capturedImage = ref(null)
+// Camera device selection
+const cameraDevices = ref([])
+const selectedDeviceId = ref('')
+const cameraError = ref('')
 
-const isFrontCamera = ref(true)
 const emit = defineEmits(['capture'])
 
+async function loadCameraDevices() {
+  try {
+    // Request permission first so labels are populated
+    const tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    tempStream.getTracks().forEach(t => t.stop())
+
+    const devices = await navigator.mediaDevices.enumerateDevices()
+    cameraDevices.value = devices.filter(d => d.kind === 'videoinput')
+
+    if (cameraDevices.value.length > 0 && !selectedDeviceId.value) {
+      selectedDeviceId.value = cameraDevices.value[0].deviceId
+    }
+    cameraError.value = ''
+  } catch (err) {
+    console.error('Camera enumeration error:', err)
+    if (err.name === 'NotAllowedError') {
+      cameraError.value = 'Izin kamera ditolak. Silakan izinkan akses kamera di pengaturan browser Anda.'
+    } else if (err.name === 'NotFoundError') {
+      cameraError.value = 'Tidak ada kamera yang ditemukan di perangkat ini.'
+    } else {
+      cameraError.value = 'Gagal mengakses kamera. Pastikan kamera tersedia dan browser memiliki izin.'
+    }
+  }
+}
+
 async function startCamera() {
+  stopCamera()
+  cameraError.value = ''
+
+  if (!selectedDeviceId.value) {
+    cameraError.value = 'Tidak ada kamera yang dipilih.'
+    return
+  }
+
   try {
     stream.value = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: isFrontCamera.value ? 'user' : 'environment'
-      },
+      video: { deviceId: { exact: selectedDeviceId.value } },
       audio: false
     })
 
-    videoRef.value.srcObject = stream.value
+    if (videoRef.value) {
+      videoRef.value.srcObject = stream.value
+    }
   } catch (err) {
-    console.error('Camera error:', err)
+    console.error('Camera start error:', err)
+    if (err.name === 'NotAllowedError') {
+      cameraError.value = 'Izin kamera ditolak. Silakan izinkan akses kamera di pengaturan browser Anda.'
+    } else {
+      cameraError.value = 'Gagal membuka kamera. Coba pilih kamera lain.'
+    }
   }
 }
 
@@ -32,33 +72,35 @@ function stopCamera() {
   }
 }
 
-function switchCamera() {
-  stopCamera()
-  isFrontCamera.value = !isFrontCamera.value
-  startCamera()
+function onDeviceChange() {
+  if (selectedDeviceId.value) {
+    startCamera()
+  }
+}
+
+// Detect if selected camera is likely a front camera (for mirror effect)
+function isFrontCamera() {
+  const device = cameraDevices.value.find(d => d.deviceId === selectedDeviceId.value)
+  if (!device) return false
+  const label = (device.label || '').toLowerCase()
+  return label.includes('front') || label.includes('user') || label.includes('facetime')
 }
 
 function capturePhoto() {
-  console.log('capture clicked')
-  
   const video = videoRef.value
   const canvas = canvasRef.value
-  
-  // ✅ VALIDASI DULU
+
   if (!video || !canvas || !video.videoWidth) {
-    console.error('❌ Video/canvas not ready')
+    console.error('Video/canvas not ready')
     return
   }
-  
-  console.log('✅ Video ready:', video.videoWidth, 'x', video.videoHeight)
-  
+
   const ctx = canvas.getContext('2d')
   canvas.width = video.videoWidth
   canvas.height = video.videoHeight
 
-  // FIX MIRROR
   ctx.save()
-  if (isFrontCamera.value) {
+  if (isFrontCamera()) {
     ctx.scale(-1, 1)
     ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height)
   } else {
@@ -66,25 +108,16 @@ function capturePhoto() {
   }
   ctx.restore()
 
-  // ✅ SEKARANG BARU LOG
   const imageData = canvas.toDataURL('image/png')
-  console.log('✅ Image captured:', imageData.length, 'bytes')
-  
-  capturedImage.value = imageData
-  console.log('✅ Emitted to parent')
+  emit('capture', imageData)
 }
 
-function confirmPhoto() {
-  emit('capture', capturedImage.value)
-  capturedImage.value = null
-}
 
-function retakePhoto() {
-  capturedImage.value = null
-}
 
 onMounted(() => {
-  startCamera()
+  loadCameraDevices().then(() => {
+    if (selectedDeviceId.value) startCamera()
+  })
 })
 
 onBeforeUnmount(() => {
@@ -93,70 +126,49 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-4">
-    <!-- VIDEO -->
-    <div class="relative">
+  <div class="flex flex-col items-center gap-4 w-full">
 
-  <!-- PREVIEW RESULT -->
-  <img
-    v-if="capturedImage"
-    :src="capturedImage"
-    class="rounded-xl w-[320px] h-[420px] object-cover"
-  />
+    <!-- Camera error -->
+    <div v-if="cameraError" class="w-full rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700 text-center">
+      {{ cameraError }}
+    </div>
 
-  <!-- LIVE CAMERA -->
-  <video
-    v-else
-    ref="videoRef"
-    autoplay
-    playsinline
-    class="rounded-xl w-[320px] h-[420px] object-cover bg-black"
-    :class="isFrontCamera ? 'scale-x-[-1]' : ''"
-  />
+    <!-- Camera selector -->
+    <div v-if="cameraDevices.length > 1" class="w-full">
+      <select
+        v-model="selectedDeviceId"
+        @change="onDeviceChange"
+        class="w-full px-4 py-3 rounded-xl border border-espresso/10 bg-white text-espresso text-sm outline-none focus:ring-2 focus:ring-tan appearance-none"
+      >
+        <option v-for="device in cameraDevices" :key="device.deviceId" :value="device.deviceId">
+          {{ device.label || `Camera ${cameraDevices.indexOf(device) + 1}` }}
+        </option>
+      </select>
+    </div>
 
-  <canvas ref="canvasRef" class="hidden"></canvas>
-</div>
+    <!-- VIDEO / PREVIEW -->
+    <div class="relative w-full flex justify-center">
+      <!-- LIVE CAMERA -->
+      <video
+        ref="videoRef"
+        autoplay
+        playsinline
+        class="rounded-xl w-full max-h-[45vh] aspect-[3/4] object-contain bg-black"
+        :class="isFrontCamera() ? 'scale-x-[-1]' : ''"
+      />
+
+      <canvas ref="canvasRef" class="hidden"></canvas>
+    </div>
 
     <!-- BUTTONS -->
-     <div class="flex gap-3">
-
-  <!-- BEFORE CAPTURE -->
-  <template v-if="!capturedImage">
-
-    <button
-      @click="capturePhoto"
-      class="px-4 py-2 bg-espresso text-white rounded-full"
-    >
-      Capture
-    </button>
-
-    <button
-      @click="switchCamera"
-      class="px-4 py-2 bg-tan text-espresso rounded-full"
-    >
-      Switch Camera
-    </button>
-
-  </template>
-
-  <!-- AFTER CAPTURE -->
-  <template v-else>
-    <button
-      @click="retakePhoto"
-      class="px-4 py-2 bg-gray-200 rounded-full"
-    >
-      Retake
-    </button>
-
-    <button
-      @click="confirmPhoto"
-      class="px-4 py-2 bg-espresso text-white rounded-full"
-    >
-      Use Photo
-    </button>
-
-  </template>
-
-</div>
-</div>
+    <div class="flex gap-3 w-full">
+      <button
+        @click="capturePhoto"
+        :disabled="!!cameraError"
+        class="flex-1 px-4 py-3 bg-espresso text-white rounded-full font-semibold disabled:opacity-50 transition"
+      >
+        Capture
+      </button>
+    </div>
+  </div>
 </template>
