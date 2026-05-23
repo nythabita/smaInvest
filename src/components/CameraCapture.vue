@@ -1,5 +1,9 @@
+<script>
+let cachedDeviceId = ''
+let cachedMirrored = false
+</script>
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 
 const videoRef = ref(null)
 const canvasRef = ref(null)
@@ -7,8 +11,12 @@ const stream = ref(null)
 
 // Camera device selection
 const cameraDevices = ref([])
-const selectedDeviceId = ref('')
+const selectedDeviceId = ref(cachedDeviceId)
 const cameraError = ref('')
+const isMirrored = ref(cachedMirrored)
+
+watch(selectedDeviceId, val => cachedDeviceId = val)
+watch(isMirrored, val => cachedMirrored = val)
 
 const emit = defineEmits(['capture'])
 
@@ -22,7 +30,9 @@ async function loadCameraDevices() {
     cameraDevices.value = devices.filter(d => d.kind === 'videoinput')
 
     if (cameraDevices.value.length > 0 && !selectedDeviceId.value) {
-      selectedDeviceId.value = cameraDevices.value[0].deviceId
+      // If no cached device is found/valid, default to first camera
+      const deviceExists = cameraDevices.value.some(d => d.deviceId === cachedDeviceId)
+      selectedDeviceId.value = deviceExists ? cachedDeviceId : cameraDevices.value[0].deviceId
     }
     cameraError.value = ''
   } catch (err) {
@@ -74,17 +84,11 @@ function stopCamera() {
 
 function onDeviceChange() {
   if (selectedDeviceId.value) {
+    isMirrored.value = false // reset to default
     startCamera()
   }
 }
 
-// Detect if selected camera is likely a front camera (for mirror effect)
-function isFrontCamera() {
-  const device = cameraDevices.value.find(d => d.deviceId === selectedDeviceId.value)
-  if (!device) return false
-  const label = (device.label || '').toLowerCase()
-  return label.includes('front') || label.includes('user') || label.includes('facetime')
-}
 
 function capturePhoto() {
   const video = videoRef.value
@@ -100,7 +104,7 @@ function capturePhoto() {
   canvas.height = video.videoHeight
 
   ctx.save()
-  if (isFrontCamera()) {
+  if (isMirrored.value) {
     ctx.scale(-1, 1)
     ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height)
   } else {
@@ -153,9 +157,19 @@ onBeforeUnmount(() => {
         ref="videoRef"
         autoplay
         playsinline
-        class="rounded-xl w-full max-h-[45vh] aspect-[3/4] object-contain bg-black"
-        :class="isFrontCamera() ? 'scale-x-[-1]' : ''"
+        class="rounded-xl w-full max-h-[45vh] aspect-[3/4] object-contain bg-black transition-transform duration-300"
+        :class="isMirrored ? 'scale-x-[-1]' : ''"
       />
+
+      <!-- Mirror Toggle Overlay -->
+      <button
+        @click="isMirrored = !isMirrored"
+        class="absolute bottom-4 right-4 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-md transition-colors"
+        title="Toggle Mirror"
+      >
+        <svg v-if="isMirrored" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M15 4h4v16h-4"/><path d="M9 4H5v16h4"/></svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M12 3v18"/><path d="M12 3l4 4"/><path d="M12 3l-4 4"/></svg>
+      </button>
 
       <canvas ref="canvasRef" class="hidden"></canvas>
     </div>

@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import LandingPage from '../pages/LandingPage.vue'
 import Dashboard from '../pages/Dashboard.vue'
 import LoginPage from '../pages/LoginPage.vue'
+import ClosetPage from '../pages/ClosetPage.vue'
 
 const routes = [
   {
@@ -20,6 +21,12 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/closet',
+    name: 'Closet',
+    component: ClosetPage,
     meta: { requiresAuth: true }
   }
 ]

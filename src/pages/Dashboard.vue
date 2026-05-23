@@ -20,7 +20,7 @@ const router = useRouter()
 const handleLogout = async () => {
   try {
     await signOut(auth)
-    router.push('/login')
+    router.push('/')
   } catch (error) {
     console.error('Logout error:', error)
   }
@@ -30,16 +30,7 @@ const handleLogout = async () => {
 /*  Reactive state                                                            */
 /* -------------------------------------------------------------------------- */
 
-// One entry per layer: active index + lock state
-const state = reactive(
-  LAYERS.map((layer) => ({
-    key: layer.key,
-    label: layer.label,
-    items: layer.items,
-    activeIndex: Math.floor(layer.items.length / 2),
-    locked: false
-  }))
-)
+import { state, closetItems } from '../store/closet.js'
 
 // Refs to each scroll rail DOM node
 const railRefs = ref([])
@@ -52,10 +43,13 @@ const showCamera = ref(false)
 const selectedCategory = ref('tops')
 const customName = ref('')
 const pendingCapturedImage = ref(null)
-const closetItems = ref([])
 const inputMode = ref('camera') // 'camera' | 'upload'
 const uploadError = ref('')
 const fileInputRef = ref(null)
+
+const saveToClosetToggle = ref(true)
+const addToSliderToggle = ref(true)
+const saveError = ref('')
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -186,8 +180,21 @@ const currentOutfit = computed(() =>
 
 function saveToCloset() {
   if (!pendingCapturedImage.value) return
+  saveError.value = ''
 
-  const itemLabel = customName.value || `My ${selectedCategory.value}`
+  if (!saveToClosetToggle.value && !addToSliderToggle.value) {
+    saveError.value = 'Silakan pilih setidaknya satu tempat penyimpanan.'
+    return
+  }
+
+  const categoryItems = closetItems.value.filter(i => i.category === selectedCategory.value)
+  let prefix = 'Item'
+  if (selectedCategory.value === 'headwear') prefix = 'Headwear'
+  if (selectedCategory.value === 'tops') prefix = 'Top'
+  if (selectedCategory.value === 'bottoms') prefix = 'Bottom'
+  
+  const fallbackName = `My ${prefix} ${categoryItems.length + 1}`
+  const itemLabel = customName.value.trim() || fallbackName
   
   const newItem = {
     id: Date.now(),
@@ -200,22 +207,27 @@ function saveToCloset() {
   }
 
   // Add to Closet
-  closetItems.value.push(newItem)
+  if (saveToClosetToggle.value) {
+    closetItems.value.push(newItem)
+  }
 
   // Add to Slider
-  const layerIndex = state.findIndex(l => l.key === selectedCategory.value)
-  if (layerIndex !== -1) {
-    state[layerIndex].items.push(newItem)
-    const newIndex = state[layerIndex].items.length - 1
-    state[layerIndex].activeIndex = newIndex
-    nextTick(() => {
-      scrollToIndex(layerIndex, newIndex)
-    })
+  if (addToSliderToggle.value) {
+    const layerIndex = state.findIndex(l => l.key === selectedCategory.value)
+    if (layerIndex !== -1) {
+      state[layerIndex].items.push(newItem)
+      const newIndex = state[layerIndex].items.length - 1
+      state[layerIndex].activeIndex = newIndex
+      nextTick(() => {
+        scrollToIndex(layerIndex, newIndex)
+      })
+    }
   }
 
   // Reset and close
   pendingCapturedImage.value = null
   customName.value = ''
+  // Keep the user's toggle choices for their next capture instead of resetting to true
   toggleCamera()
 }
 
@@ -225,6 +237,7 @@ function toggleCamera() {
     pendingCapturedImage.value = null
     customName.value = ''
     uploadError.value = ''
+    saveError.value = ''
     inputMode.value = 'camera'
     if (fileInputRef.value) {
       fileInputRef.value.value = ''
@@ -297,6 +310,12 @@ function handleFileUpload(event) {
             Add Clothing
           </button>
           <button
+            @click="router.push('/closet')"
+            class="press inline-flex items-center gap-2 rounded-full bg-cream border border-espresso/10 text-espresso px-4 py-2 text-sm font-medium shadow-soft hover:bg-white transition-colors"
+          >
+            My Closet
+          </button>
+          <button
             @click="handleLogout"
             class="press inline-flex items-center gap-2 rounded-full bg-cream border border-espresso/10 text-espresso px-4 py-2 text-sm font-medium shadow-soft hover:bg-white transition-colors"
           >
@@ -309,7 +328,7 @@ function handleFileUpload(event) {
     <!-- CAMERA / UPLOAD OVERLAY -->
     <div v-if="showCamera" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <!-- Wrapper relative for absolute close button positioning -->
-      <div class="relative max-w-sm w-full mt-8">
+      <div class="relative w-[92vw] max-w-2xl mt-8">
         <button
           @click="toggleCamera"
           class="absolute -top-12 right-0 text-white text-2xl z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
@@ -318,138 +337,163 @@ function handleFileUpload(event) {
         </button>
 
         <!-- Inner scrollable area -->
-        <div class="max-h-[80vh] overflow-y-auto no-scrollbar w-full">
-          <template v-if="!pendingCapturedImage">
-          <!-- Input Mode Tabs -->
-          <div class="flex gap-2 mb-4">
-            <button
-              @click="inputMode = 'camera'"
-              :class="[
-                'flex-1 px-4 py-3 rounded-full text-sm font-semibold transition',
-                inputMode === 'camera'
-                  ? 'bg-espresso text-cream shadow-soft'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              ]"
-            >
-              📷 Camera
-            </button>
-            <button
-              @click="inputMode = 'upload'"
-              :class="[
-                'flex-1 px-4 py-3 rounded-full text-sm font-semibold transition',
-                inputMode === 'upload'
-                  ? 'bg-espresso text-cream shadow-soft'
-                  : 'bg-white/20 text-white hover:bg-white/30'
-              ]"
-            >
-              📁 Upload
-            </button>
-          </div>
-
-          <!-- Camera Mode -->
-          <div v-if="inputMode === 'camera'">
-            <CameraCapture
-              @capture="(imageData) => {
-                pendingCapturedImage = imageData
-              }"
-            />
-          </div>
-
-          <!-- Upload Mode -->
-          <div v-else class="bg-white rounded-3xl p-5 sm:p-6 shadow-card">
-            <h3 class="font-display text-xl text-espresso mb-4 text-center">Upload Gambar</h3>
-            
-            <div v-if="uploadError" class="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-sm text-center border border-red-100">
-              {{ uploadError }}
-            </div>
-
-            <!-- Hidden file input -->
-            <input
-              ref="fileInputRef"
-              type="file"
-              accept=".jpg,.jpeg,.png,.webp"
-              class="hidden"
-              @change="handleFileUpload"
-            />
-
-            <!-- Upload drop zone -->
-            <button
-              @click="triggerFileInput"
-              class="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-espresso/20 bg-cream/50 hover:bg-beige/50 transition flex flex-col items-center justify-center gap-4 cursor-pointer"
-            >
-              <div class="h-16 w-16 rounded-full bg-tan/10 grid place-items-center text-tan">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div class="max-h-[85vh] overflow-y-auto no-scrollbar w-full bg-white rounded-3xl shadow-card overflow-hidden">
+          <div class="p-5 sm:p-6">
+            <template v-if="!pendingCapturedImage">
+              <!-- Input Mode Tabs -->
+              <div class="flex gap-2 mb-6 max-w-sm mx-auto">
+                <button
+                  @click="inputMode = 'camera'"
+                  :class="[
+                    'flex-1 px-4 py-3 rounded-full text-sm font-semibold transition border',
+                    inputMode === 'camera'
+                      ? 'bg-espresso text-cream border-espresso shadow-soft'
+                      : 'bg-cream text-espresso-soft border-espresso/10 hover:bg-beige'
+                  ]"
+                >
+                  📷 Camera
+                </button>
+                <button
+                  @click="inputMode = 'upload'"
+                  :class="[
+                    'flex-1 px-4 py-3 rounded-full text-sm font-semibold transition border',
+                    inputMode === 'upload'
+                      ? 'bg-espresso text-cream border-espresso shadow-soft'
+                      : 'bg-cream text-espresso-soft border-espresso/10 hover:bg-beige'
+                  ]"
+                >
+                  📁 Upload
+                </button>
               </div>
-              <div class="text-center">
-                <p class="font-semibold text-espresso">Pilih gambar</p>
-                <p class="text-xs text-espresso-soft mt-1">JPG, PNG, WebP · Maks 5MB</p>
+
+              <!-- Camera Mode -->
+              <div v-if="inputMode === 'camera'" class="max-w-sm mx-auto">
+                <CameraCapture
+                  @capture="(imageData) => {
+                    pendingCapturedImage = imageData
+                  }"
+                />
               </div>
-            </button>
-          </div>
-        </template>
+
+              <!-- Upload Mode -->
+              <div v-else class="max-w-sm mx-auto">
+                <h3 class="font-display text-xl text-espresso mb-4 text-center">Upload Gambar</h3>
+                
+                <div v-if="uploadError" class="mb-4 p-3 rounded-xl bg-red-50 text-red-600 text-sm text-center border border-red-100">
+                  {{ uploadError }}
+                </div>
+
+                <!-- Hidden file input -->
+                <input
+                  ref="fileInputRef"
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  class="hidden"
+                  @change="handleFileUpload"
+                />
+
+                <!-- Upload drop zone -->
+                <button
+                  @click="triggerFileInput"
+                  class="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-espresso/20 bg-cream/50 hover:bg-beige/50 transition flex flex-col items-center justify-center gap-4 cursor-pointer"
+                >
+                  <div class="h-16 w-16 rounded-full bg-tan/10 grid place-items-center text-tan">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  </div>
+                  <div class="text-center">
+                    <p class="font-semibold text-espresso">Pilih gambar</p>
+                    <p class="text-xs text-espresso-soft mt-1">JPG, PNG, WebP · Maks 5MB</p>
+                  </div>
+                </button>
+              </div>
+            </template>
         
-        <template v-else>
-          <!-- Preview & Approve Mode -->
-          <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-card">
-            <h3 class="font-display text-xl text-espresso mb-4 text-center">Add to Closet</h3>
-            
-            <div class="aspect-[3/4] w-full rounded-2xl overflow-hidden mb-5 bg-espresso/5 flex items-center justify-center border border-espresso/10">
-              <img :src="pendingCapturedImage" class="w-[85%] h-[85%] object-cover rounded-xl shadow-sm" />
-            </div>
+            <template v-else>
+              <!-- Preview & Approve Mode -->
+              <div class="flex flex-col md:flex-row gap-6 lg:gap-8">
+                
+                <!-- Left: Compact Image Preview -->
+                <div class="w-full md:w-5/12 lg:w-1/2 flex items-center justify-center">
+                  <div class="relative w-full max-w-[280px] md:max-w-sm h-[40vh] md:h-auto md:aspect-[3/4] rounded-2xl overflow-hidden bg-espresso/5 border border-espresso/10">
+                    <img :src="pendingCapturedImage" class="absolute inset-0 w-full h-full object-contain p-2" />
+                  </div>
+                </div>
 
-            <input
-              v-model="customName"
-              type="text"
-              placeholder="Name this item..."
-              class="w-full mb-4 px-4 py-3 rounded-xl border border-espresso/10 bg-cream text-espresso outline-none focus:ring-2 focus:ring-tan"
-            />
+                <!-- Right: Form -->
+                <div class="w-full md:w-7/12 lg:w-1/2 flex flex-col justify-center">
+                  <h3 class="font-display text-2xl text-espresso mb-6 text-center md:text-left">Add to Closet</h3>
+                  
+                  <input
+                    v-model="customName"
+                    type="text"
+                    placeholder="Name this item..."
+                    class="w-full mb-6 px-4 py-3 rounded-xl border border-espresso/10 bg-cream/50 text-espresso outline-none focus:ring-2 focus:ring-tan"
+                  />
 
-            <div class="flex justify-center gap-2 mb-6">
-              <button
-                @click="selectedCategory = 'headwear'"
-                :class="[
-                  'px-4 py-2 rounded-full text-sm font-medium transition',
-                  selectedCategory === 'headwear' ? 'bg-tan text-white' : 'bg-cream text-espresso-soft hover:bg-beige'
-                ]"
-              >
-                Headwear
-              </button>
-              <button
-                @click="selectedCategory = 'tops'"
-                :class="[
-                  'px-4 py-2 rounded-full text-sm font-medium transition',
-                  selectedCategory === 'tops' ? 'bg-tan text-white' : 'bg-cream text-espresso-soft hover:bg-beige'
-                ]"
-              >
-                Top
-              </button>
-              <button
-                @click="selectedCategory = 'bottoms'"
-                :class="[
-                  'px-4 py-2 rounded-full text-sm font-medium transition',
-                  selectedCategory === 'bottoms' ? 'bg-tan text-white' : 'bg-cream text-espresso-soft hover:bg-beige'
-                ]"
-              >
-                Bottom
-              </button>
-            </div>
+                  <p class="text-sm font-semibold text-espresso-soft mb-3 text-center md:text-left">Category</p>
+                  <div class="flex justify-center md:justify-start gap-2 mb-6 flex-wrap">
+                    <button
+                      @click="selectedCategory = 'headwear'"
+                      :class="[
+                        'px-5 py-2.5 rounded-full text-sm font-medium transition',
+                        selectedCategory === 'headwear' ? 'bg-tan text-white shadow-soft' : 'bg-cream text-espresso-soft hover:bg-beige'
+                      ]"
+                    >
+                      Headwear
+                    </button>
+                    <button
+                      @click="selectedCategory = 'tops'"
+                      :class="[
+                        'px-5 py-2.5 rounded-full text-sm font-medium transition',
+                        selectedCategory === 'tops' ? 'bg-tan text-white shadow-soft' : 'bg-cream text-espresso-soft hover:bg-beige'
+                      ]"
+                    >
+                      Top
+                    </button>
+                    <button
+                      @click="selectedCategory = 'bottoms'"
+                      :class="[
+                        'px-5 py-2.5 rounded-full text-sm font-medium transition',
+                        selectedCategory === 'bottoms' ? 'bg-tan text-white shadow-soft' : 'bg-cream text-espresso-soft hover:bg-beige'
+                      ]"
+                    >
+                      Bottom
+                    </button>
+                  </div>
 
-            <div class="flex gap-3">
-              <button
-                @click="pendingCapturedImage = null"
-                class="flex-1 px-4 py-3 rounded-full bg-cream text-espresso font-semibold hover:bg-beige transition"
-              >
-                Retake
-              </button>
-              <button
-                @click="saveToCloset"
-                class="flex-1 px-4 py-3 rounded-full bg-espresso text-cream font-semibold hover:bg-espresso-soft transition"
-              >
-                Save to Closet
-              </button>
-            </div>
+                  <p class="text-sm font-semibold text-espresso-soft mb-3 text-center md:text-left">Save Destination</p>
+                  <div class="flex flex-col md:flex-row gap-4 justify-center md:justify-start mb-6">
+                    <label class="flex items-center gap-2 cursor-pointer bg-cream/30 px-4 py-2.5 rounded-xl border border-espresso/5 hover:bg-cream/50 transition">
+                      <input type="checkbox" v-model="saveToClosetToggle" class="w-4 h-4 rounded text-tan focus:ring-tan accent-tan cursor-pointer" />
+                      <span class="text-sm text-espresso font-medium">My Closet</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer bg-cream/30 px-4 py-2.5 rounded-xl border border-espresso/5 hover:bg-cream/50 transition">
+                      <input type="checkbox" v-model="addToSliderToggle" class="w-4 h-4 rounded text-tan focus:ring-tan accent-tan cursor-pointer" />
+                      <span class="text-sm text-espresso font-medium">Outfit Slider</span>
+                    </label>
+                  </div>
+                  <div v-if="saveError" class="mb-4 text-center md:text-left">
+                    <p class="text-sm text-red-500 font-medium">{{ saveError }}</p>
+                  </div>
+
+                  <div class="flex gap-3 mt-auto">
+                    <button
+                      @click="pendingCapturedImage = null"
+                      class="flex-1 px-4 py-3 rounded-full bg-cream text-espresso font-semibold hover:bg-beige transition border border-espresso/5"
+                    >
+                      Retake
+                    </button>
+                    <button
+                      @click="saveToCloset"
+                      class="flex-1 px-4 py-3 rounded-full bg-espresso text-cream font-semibold hover:bg-espresso-soft transition shadow-soft"
+                    >
+                      Save to Closet
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
           </div>
-        </template>
         </div>
       </div>
     </div>
@@ -599,38 +643,6 @@ function handleFileUpload(event) {
             <Shuffle :size="14" />
             Try another mix
           </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─────────────────────────  MY CLOSET  ───────────────────────── -->
-    <section id="closet" class="relative py-16 sm:py-24 bg-gradient-to-b from-cream to-white border-t border-espresso/5">
-      <div class="mx-auto max-w-7xl px-5 sm:px-8">
-        <div class="mb-10 text-center sm:text-left reveal">
-          <p class="text-xs uppercase tracking-[0.18em] text-tan font-semibold">Your Collection</p>
-          <h2 class="mt-2 font-display text-3xl sm:text-4xl tracking-tight text-espresso">My Closet</h2>
-          <p class="mt-3 text-espresso-soft max-w-2xl">Approved items that you have saved. They are automatically added to your Clueless Slider for mixing.</p>
-        </div>
-
-        <div v-if="closetItems.length === 0" class="reveal text-center py-16 rounded-3xl border border-dashed border-espresso/20 bg-white/50">
-          <p class="text-espresso-soft">Your closet is empty. Open the camera to add items!</p>
-        </div>
-
-        <div v-else class="space-y-12 reveal">
-          <!-- Group by category -->
-          <div v-for="cat in ['headwear', 'tops', 'bottoms']" :key="cat" v-show="closetItems.some(i => i.category === cat)">
-            <h3 class="font-display text-xl mb-4 capitalize flex items-center gap-2 text-espresso">
-              <span class="w-2 h-2 rounded-full bg-tan"></span> {{ cat }}
-            </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-              <div v-for="item in closetItems.filter(i => i.category === cat)" :key="item.id" class="aspect-[3/4] bg-white rounded-2xl shadow-sm border border-espresso/5 p-3 flex flex-col items-center hover:shadow-card transition-shadow">
-                 <div class="w-full h-full relative mb-2 rounded-xl overflow-hidden bg-espresso/5 flex items-center justify-center">
-                   <img :src="item.image" class="w-[85%] h-[85%] object-cover rounded-xl" />
-                 </div>
-                 <p class="text-xs font-medium text-espresso truncate w-full text-center">{{ item.label }}</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
