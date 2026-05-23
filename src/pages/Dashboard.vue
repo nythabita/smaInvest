@@ -12,8 +12,19 @@ import CameraCapture from '../components/CameraCapture.vue'
 import LAYERS from '../data/outfits.js'
 
 import { useRouter } from 'vue-router'
+import { signOut } from 'firebase/auth'
+import { auth } from '../firebase/config'
 
 const router = useRouter()
+
+const handleLogout = async () => {
+  try {
+    await signOut(auth)
+    router.push('/login')
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Reactive state                                                            */
@@ -36,10 +47,12 @@ const setRailRef = (el, i) => {
   if (el) railRefs.value[i] = el
 }
 
-// CAMERA STATE
+// CAMERA & CLOSET STATE
 const showCamera = ref(false)
 const selectedCategory = ref('tops')
 const customName = ref('')
+const pendingCapturedImage = ref(null)
+const closetItems = ref([])
 
 /* -------------------------------------------------------------------------- */
 /*  Slider mechanics                                                          */
@@ -165,31 +178,47 @@ const currentOutfit = computed(() =>
   state.map((l) => l.items[l.activeIndex]?.label).filter(Boolean).join(' · ')
 )
 
-function addCameraItem(imageData, targetLayer, customLabel) {
-  const layerIndex = state.findIndex(l => l.key === targetLayer)
+function saveToCloset() {
+  if (!pendingCapturedImage.value) return
 
-  if (layerIndex === -1) return
-
-  state[layerIndex].items.push({
+  const itemLabel = customName.value || `My ${selectedCategory.value}`
+  
+  const newItem = {
     id: Date.now(),
-    label: `${customLabel} - ${targetLayer}`,
-    meta: "",
+    label: itemLabel,
+    category: selectedCategory.value,
+    meta: "captured",
     tint: "rgba(255,255,255,0.25)",
-    image: imageData
-  })
+    image: pendingCapturedImage.value,
+    createdAt: new Date().toISOString()
+  }
 
-  const newIndex = state[layerIndex].items.length - 1
+  // Add to Closet
+  closetItems.value.push(newItem)
 
-  state[layerIndex].activeIndex = newIndex
+  // Add to Slider
+  const layerIndex = state.findIndex(l => l.key === selectedCategory.value)
+  if (layerIndex !== -1) {
+    state[layerIndex].items.push(newItem)
+    const newIndex = state[layerIndex].items.length - 1
+    state[layerIndex].activeIndex = newIndex
+    nextTick(() => {
+      scrollToIndex(layerIndex, newIndex)
+    })
+  }
 
-  nextTick(() => {
-    scrollToIndex(layerIndex, newIndex)
-  })
+  // Reset and close
+  pendingCapturedImage.value = null
+  customName.value = ''
+  toggleCamera()
 }
 
 function toggleCamera() {
   showCamera.value = !showCamera.value
-  console.log(showCamera.value)
+  if (!showCamera.value) {
+    pendingCapturedImage.value = null
+    customName.value = ''
+  }
 }
 
 </script>
@@ -218,81 +247,103 @@ function toggleCamera() {
           </button>
           <button
             @click="toggleCamera"
-            class="press inline-flex items-center gap-2 rounded-full bg-tan text-espresso px-4 py-2 text-sm font-medium shadow-soft hover:bg-tan-soft"
+            class="press inline-flex items-center gap-2 rounded-full bg-tan text-espresso px-4 py-2 text-sm font-medium shadow-soft hover:shadow-card hover:bg-tan-soft"
           >
             Open Camera
+          </button>
+          <button
+            @click="handleLogout"
+            class="press inline-flex items-center gap-2 rounded-full bg-cream border border-espresso/10 text-espresso px-4 py-2 text-sm font-medium shadow-soft hover:bg-white transition-colors"
+          >
+            Logout
           </button>
         </div>
       </div>
     </header>
 
     <!-- CAMERA OVERLAY -->
-        <div v-if="showCamera" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-          <div class="relative">
-            <button
-              @click="toggleCamera"
-              class="absolute -top-10 right-0 text-white text-xl"
-            >
-              ✕
-            </button>
+    <div v-if="showCamera" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+      <div class="relative max-w-sm w-full mx-4">
+        <button
+          @click="toggleCamera"
+          class="absolute -top-10 right-0 text-white text-xl"
+        >
+          ✕
+        </button>
 
-           <!-- CATEGORY -->
+        <template v-if="!pendingCapturedImage">
+          <!-- Capture Mode -->
+          <CameraCapture
+            @capture="(imageData) => {
+              pendingCapturedImage = imageData
+            }"
+          />
+        </template>
+        
+        <template v-else>
+          <!-- Preview & Approve Mode -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 shadow-card">
+            <h3 class="font-display text-xl text-espresso mb-4 text-center">Add to Closet</h3>
+            
+            <div class="aspect-[3/4] w-full rounded-2xl overflow-hidden mb-5 bg-espresso/5 flex items-center justify-center border border-espresso/10">
+              <img :src="pendingCapturedImage" class="w-[85%] h-[85%] object-cover rounded-xl shadow-sm" />
+            </div>
+
             <input
-  v-model="customName"
-  type="text"
-  placeholder="Outfit name..."
-  class="w-full mb-4 px-4 py-2 rounded-xl border border-white/20 bg-white text-black outline-none"
-/>
+              v-model="customName"
+              type="text"
+              placeholder="Name this item..."
+              class="w-full mb-4 px-4 py-3 rounded-xl border border-espresso/10 bg-cream text-espresso outline-none focus:ring-2 focus:ring-tan"
+            />
 
-<div class="flex justify-center gap-2 mb-4">
+            <div class="flex justify-center gap-2 mb-6">
+              <button
+                @click="selectedCategory = 'headwear'"
+                :class="[
+                  'px-4 py-2 rounded-full text-sm font-medium transition',
+                  selectedCategory === 'headwear' ? 'bg-tan text-white' : 'bg-cream text-espresso-soft hover:bg-beige'
+                ]"
+              >
+                Headwear
+              </button>
+              <button
+                @click="selectedCategory = 'tops'"
+                :class="[
+                  'px-4 py-2 rounded-full text-sm font-medium transition',
+                  selectedCategory === 'tops' ? 'bg-tan text-white' : 'bg-cream text-espresso-soft hover:bg-beige'
+                ]"
+              >
+                Top
+              </button>
+              <button
+                @click="selectedCategory = 'bottoms'"
+                :class="[
+                  'px-4 py-2 rounded-full text-sm font-medium transition',
+                  selectedCategory === 'bottoms' ? 'bg-tan text-white' : 'bg-cream text-espresso-soft hover:bg-beige'
+                ]"
+              >
+                Bottom
+              </button>
+            </div>
 
-  <button
-    @click="selectedCategory = 'headwear'"
-    :class="[
-      'px-4 py-2 rounded-full transition',
-      selectedCategory === 'headwear'
-        ? 'bg-tan text-white'
-        : 'bg-white text-black'
-    ]"
-  >
-    Headwear
-  </button>
-
-  <button
-    @click="selectedCategory = 'tops'"
-    :class="[
-      'px-4 py-2 rounded-full transition',
-      selectedCategory === 'tops'
-        ? 'bg-tan text-white'
-        : 'bg-white text-black'
-    ]"
-  >
-    Top
-  </button>
-
-  <button
-    @click="selectedCategory = 'bottoms'"
-    :class="[
-      'px-4 py-2 rounded-full transition',
-      selectedCategory === 'bottoms'
-        ? 'bg-tan text-white'
-        : 'bg-white text-black'
-    ]"
-  >
-    Bottom
-  </button>
-
-</div>
-
-            <CameraCapture
-  @capture="(imageData) => {
-    addCameraItem(imageData, selectedCategory, customName)
-    customName = ''
-    toggleCamera()
-  }"
-/>
+            <div class="flex gap-3">
+              <button
+                @click="pendingCapturedImage = null"
+                class="flex-1 px-4 py-3 rounded-full bg-cream text-espresso font-semibold hover:bg-beige transition"
+              >
+                Retake
+              </button>
+              <button
+                @click="saveToCloset"
+                class="flex-1 px-4 py-3 rounded-full bg-espresso text-cream font-semibold hover:bg-espresso-soft transition"
+              >
+                Save to Closet
+              </button>
+            </div>
           </div>
-        </div>
+        </template>
+      </div>
+    </div>
  
 
     <!-- ─────────────────────────  CLUELESS SLIDER  ───────────────────────── -->
@@ -439,6 +490,38 @@ function toggleCamera() {
             <Shuffle :size="14" />
             Try another mix
           </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────────────────  MY CLOSET  ───────────────────────── -->
+    <section id="closet" class="relative py-16 sm:py-24 bg-gradient-to-b from-cream to-white border-t border-espresso/5">
+      <div class="mx-auto max-w-7xl px-5 sm:px-8">
+        <div class="mb-10 text-center sm:text-left reveal">
+          <p class="text-xs uppercase tracking-[0.18em] text-tan font-semibold">Your Collection</p>
+          <h2 class="mt-2 font-display text-3xl sm:text-4xl tracking-tight text-espresso">My Closet</h2>
+          <p class="mt-3 text-espresso-soft max-w-2xl">Approved items that you have saved. They are automatically added to your Clueless Slider for mixing.</p>
+        </div>
+
+        <div v-if="closetItems.length === 0" class="reveal text-center py-16 rounded-3xl border border-dashed border-espresso/20 bg-white/50">
+          <p class="text-espresso-soft">Your closet is empty. Open the camera to add items!</p>
+        </div>
+
+        <div v-else class="space-y-12 reveal">
+          <!-- Group by category -->
+          <div v-for="cat in ['headwear', 'tops', 'bottoms']" :key="cat" v-show="closetItems.some(i => i.category === cat)">
+            <h3 class="font-display text-xl mb-4 capitalize flex items-center gap-2 text-espresso">
+              <span class="w-2 h-2 rounded-full bg-tan"></span> {{ cat }}
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+              <div v-for="item in closetItems.filter(i => i.category === cat)" :key="item.id" class="aspect-[3/4] bg-white rounded-2xl shadow-sm border border-espresso/5 p-3 flex flex-col items-center hover:shadow-card transition-shadow">
+                 <div class="w-full h-full relative mb-2 rounded-xl overflow-hidden bg-espresso/5 flex items-center justify-center">
+                   <img :src="item.image" class="w-[85%] h-[85%] object-cover rounded-xl" />
+                 </div>
+                 <p class="text-xs font-medium text-espresso truncate w-full text-center">{{ item.label }}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -39,7 +39,7 @@ onBeforeUnmount(() => {
 })
 
 function goToDashboard() {
-  router.push('/dashboard')
+  router.push('/login')
 }
 
 // Data for Hero mockup stack
