@@ -1,5 +1,6 @@
 <script setup>
-import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { removeBackground } from '@imgly/background-removal'
 import {
   Sparkles,
   Shuffle,
@@ -51,8 +52,50 @@ const saveToClosetToggle = ref(true)
 const addToSliderToggle = ref(true)
 const saveError = ref('')
 
+// Background removal state
+const isProcessingBg = ref(false)
+const bgRemovalError = ref('')
+const originalImage = ref(null) // keep original in case bg removal fails
+
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
+/* -------------------------------------------------------------------------- */
+/*  Background removal                                                        */
+/* -------------------------------------------------------------------------- */
+
+async function processBackgroundRemoval(imageDataUrl) {
+  originalImage.value = imageDataUrl
+  pendingCapturedImage.value = imageDataUrl  // show original immediately
+  isProcessingBg.value = true
+  bgRemovalError.value = ''
+
+  try {
+    // Convert data URL to blob for the library
+    const response = await fetch(imageDataUrl)
+    const blob = await response.blob()
+
+    const resultBlob = await removeBackground(blob, {
+      progress: (key, current, total) => {
+        // Optional: could track progress here
+      }
+    })
+
+    // Convert result blob back to data URL for display
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      pendingCapturedImage.value = e.target.result
+      isProcessingBg.value = false
+    }
+    reader.readAsDataURL(resultBlob)
+  } catch (err) {
+    console.error('Background removal failed:', err)
+    bgRemovalError.value = 'Background removal gagal. Menggunakan gambar asli.'
+    // Keep original image — don't block the user
+    pendingCapturedImage.value = imageDataUrl
+    isProcessingBg.value = false
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Slider mechanics                                                          */
@@ -235,9 +278,12 @@ function toggleCamera() {
   showCamera.value = !showCamera.value
   if (!showCamera.value) {
     pendingCapturedImage.value = null
+    originalImage.value = null
     customName.value = ''
     uploadError.value = ''
     saveError.value = ''
+    bgRemovalError.value = ''
+    isProcessingBg.value = false
     inputMode.value = 'camera'
     if (fileInputRef.value) {
       fileInputRef.value.value = ''
@@ -273,7 +319,7 @@ function handleFileUpload(event) {
 
   const reader = new FileReader()
   reader.onload = (e) => {
-    pendingCapturedImage.value = e.target.result
+    processBackgroundRemoval(e.target.result)
   }
   reader.readAsDataURL(file)
   event.target.value = ''
@@ -370,7 +416,7 @@ function handleFileUpload(event) {
               <div v-if="inputMode === 'camera'" class="max-w-sm mx-auto">
                 <CameraCapture
                   @capture="(imageData) => {
-                    pendingCapturedImage = imageData
+                    processBackgroundRemoval(imageData)
                   }"
                 />
               </div>
@@ -409,13 +455,30 @@ function handleFileUpload(event) {
             </template>
         
             <template v-else>
+              <!-- Processing overlay -->
+              <div v-if="isProcessingBg" class="flex flex-col items-center justify-center py-12 gap-6">
+                <div class="relative w-full max-w-[200px] aspect-square">
+                  <img :src="pendingCapturedImage" class="w-full h-full object-contain rounded-2xl opacity-40" />
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="w-12 h-12 border-4 border-tan/30 border-t-tan rounded-full animate-spin"></div>
+                  </div>
+                </div>
+                <div class="text-center">
+                  <p class="font-display text-lg text-espresso">Removing background...</p>
+                  <p class="text-xs text-espresso-soft mt-1">Proses ini mungkin memakan waktu beberapa detik</p>
+                </div>
+              </div>
+
               <!-- Preview & Approve Mode -->
-              <div class="flex flex-col md:flex-row gap-6 lg:gap-8">
+              <div v-else class="flex flex-col md:flex-row gap-6 lg:gap-8">
                 
                 <!-- Left: Compact Image Preview -->
-                <div class="w-full md:w-5/12 lg:w-1/2 flex items-center justify-center">
-                  <div class="relative w-full max-w-[280px] md:max-w-sm h-[40vh] md:h-auto md:aspect-[3/4] rounded-2xl overflow-hidden bg-espresso/5 border border-espresso/10">
+                <div class="w-full md:w-5/12 lg:w-1/2 flex flex-col items-center justify-center gap-2">
+                  <div class="relative w-full max-w-[280px] md:max-w-sm h-[40vh] md:h-auto md:aspect-[3/4] rounded-2xl overflow-hidden border border-espresso/10" style="background: repeating-conic-gradient(#e8e0d4 0% 25%, #fdf7ed 0% 50%) 50% / 20px 20px">
                     <img :src="pendingCapturedImage" class="absolute inset-0 w-full h-full object-contain p-2" />
+                  </div>
+                  <div v-if="bgRemovalError" class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 text-center border border-amber-100 max-w-[280px]">
+                    {{ bgRemovalError }}
                   </div>
                 </div>
 
