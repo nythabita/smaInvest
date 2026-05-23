@@ -13,8 +13,9 @@ import CameraCapture from '../components/CameraCapture.vue'
 import LAYERS from '../data/outfits.js'
 
 import { useRouter } from 'vue-router'
-import { signOut } from 'firebase/auth'
+import { signOut, onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../firebase/config'
+import { uploadToCloudinary } from '../services/cloudinary.js'
 
 const router = useRouter()
 
@@ -31,7 +32,7 @@ const handleLogout = async () => {
 /*  Reactive state                                                            */
 /* -------------------------------------------------------------------------- */
 
-import { state, closetItems } from '../store/closet.js'
+import { state, closetItems, loadClosetFromFirestore, saveItemToFirestore, initClosetAuthListener } from '../store/closet.js'
 
 // Refs to each scroll rail DOM node
 const railRefs = ref([])
@@ -51,6 +52,7 @@ const fileInputRef = ref(null)
 const saveToClosetToggle = ref(true)
 const addToSliderToggle = ref(true)
 const saveError = ref('')
+const isSaving = ref(false)
 
 // Background removal state
 const isProcessingBg = ref(false)
@@ -206,6 +208,9 @@ onMounted(() => {
   nextTick(() => {
     state.forEach((_, i) => scrollToIndex(i, state[i].activeIndex, 'auto'))
   })
+
+  // Load user's saved clothing from Firestore and handle auth automatically
+  initClosetAuthListener()
 })
 
 onBeforeUnmount(() => {
@@ -221,7 +226,7 @@ const currentOutfit = computed(() =>
   state.map((l) => l.items[l.activeIndex]?.label).filter(Boolean).join(' · ')
 )
 
-function saveToCloset() {
+async function saveToCloset() {
   if (!pendingCapturedImage.value) return
   saveError.value = ''
 
@@ -238,40 +243,58 @@ function saveToCloset() {
   
   const fallbackName = `My ${prefix} ${categoryItems.length + 1}`
   const itemLabel = customName.value.trim() || fallbackName
-  
-  const newItem = {
-    id: Date.now(),
-    label: itemLabel,
-    category: selectedCategory.value,
-    meta: "captured",
-    tint: "rgba(255,255,255,0.25)",
-    image: pendingCapturedImage.value,
-    createdAt: new Date().toISOString()
-  }
 
-  // Add to Closet
-  if (saveToClosetToggle.value) {
-    closetItems.value.push(newItem)
-  }
+  isSaving.value = true
 
-  // Add to Slider
-  if (addToSliderToggle.value) {
-    const layerIndex = state.findIndex(l => l.key === selectedCategory.value)
-    if (layerIndex !== -1) {
-      state[layerIndex].items.push(newItem)
-      const newIndex = state[layerIndex].items.length - 1
-      state[layerIndex].activeIndex = newIndex
-      nextTick(() => {
-        scrollToIndex(layerIndex, newIndex)
-      })
+  try {
+    // 1. Upload image to Cloudinary
+    const imageUrl = await uploadToCloudinary(pendingCapturedImage.value)
+
+    // 2. Build item object
+    const newItem = {
+      id: Date.now(),
+      label: itemLabel,
+      category: selectedCategory.value,
+      meta: "captured",
+      tint: "rgba(255,255,255,0.25)",
+      image: imageUrl,
+      createdAt: new Date().toISOString(),
+      inSlider: addToSliderToggle.value,
+      isDefault: false
     }
-  }
 
-  // Reset and close
-  pendingCapturedImage.value = null
-  customName.value = ''
-  // Keep the user's toggle choices for their next capture instead of resetting to true
-  toggleCamera()
+    // 3. Save metadata to Firestore
+    const user = auth.currentUser
+    if (user) {
+      const firestoreId = await saveItemToFirestore(user.uid, newItem)
+      newItem.firestoreId = firestoreId
+    }
+
+    // 4. Add to local closet (source of truth)
+    closetItems.value.push(newItem)
+
+    // 5. Update slider active index if needed
+    if (addToSliderToggle.value) {
+      const layerIndex = state.findIndex(l => l.key === selectedCategory.value)
+      if (layerIndex !== -1) {
+        nextTick(() => {
+          const newIndex = state[layerIndex].items.length - 1
+          state[layerIndex].activeIndex = newIndex
+          scrollToIndex(layerIndex, newIndex)
+        })
+      }
+    }
+
+    // Reset and close
+    pendingCapturedImage.value = null
+    customName.value = ''
+    toggleCamera()
+  } catch (err) {
+    console.error('Save failed:', err)
+    saveError.value = 'Gagal menyimpan. Silakan coba lagi.'
+  } finally {
+    isSaving.value = false
+  }
 }
 
 function toggleCamera() {
@@ -542,15 +565,18 @@ function handleFileUpload(event) {
                   <div class="flex gap-3 mt-auto">
                     <button
                       @click="pendingCapturedImage = null"
-                      class="flex-1 px-4 py-3 rounded-full bg-cream text-espresso font-semibold hover:bg-beige transition border border-espresso/5"
+                      :disabled="isSaving"
+                      class="flex-1 px-4 py-3 rounded-full bg-cream text-espresso font-semibold hover:bg-beige transition border border-espresso/5 disabled:opacity-50"
                     >
                       Retake
                     </button>
                     <button
                       @click="saveToCloset"
-                      class="flex-1 px-4 py-3 rounded-full bg-espresso text-cream font-semibold hover:bg-espresso-soft transition shadow-soft"
+                      :disabled="isSaving"
+                      class="flex-1 px-4 py-3 rounded-full bg-espresso text-cream font-semibold hover:bg-espresso-soft transition shadow-soft disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                      Save to Closet
+                      <span v-if="isSaving" class="w-4 h-4 border-2 border-cream/30 border-t-cream rounded-full animate-spin"></span>
+                      {{ isSaving ? 'Menyimpan...' : 'Save to Closet' }}
                     </button>
                   </div>
                 </div>

@@ -1,8 +1,12 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft } from 'lucide-vue-next'
-import { closetItems, state } from '../store/closet.js'
+import { ArrowLeft, Loader2 } from 'lucide-vue-next'
+import { closetItems, state, updateSliderStatus, isLoadingCloset, initClosetAuthListener } from '../store/closet.js'
+
+onMounted(() => {
+  initClosetAuthListener()
+})
 
 const router = useRouter()
 
@@ -11,16 +15,27 @@ const categories = ['headwear', 'tops', 'bottoms']
 const hasItems = computed(() => closetItems.value.length > 0)
 
 const isInSlider = (item) => {
-  const layer = state.find(l => l.key === item.category)
-  return layer && layer.items.some(i => i.id === item.id)
+  return item.inSlider === true
 }
 
-const addToSlider = (item) => {
-  const layer = state.find(l => l.key === item.category)
-  if (layer && !layer.items.some(i => i.id === item.id)) {
-    layer.items.push(item)
-    // Make it the active item
-    layer.activeIndex = layer.items.length - 1
+const toggleSlider = async (item) => {
+  item.inSlider = !item.inSlider
+  if (item.inSlider) {
+    const layer = state.find(l => l.key === item.category)
+    if (layer) {
+      layer.activeIndex = layer.items.length - (layer.items.includes(item) ? 1 : 0)
+    }
+  }
+
+  // Persist to Firestore if it's not a default item
+  if (item.firestoreId) {
+    try {
+      await updateSliderStatus(item.firestoreId, item.inSlider)
+    } catch (err) {
+      console.error('Failed to update slider status:', err)
+      // Revert on failure
+      item.inSlider = !item.inSlider
+    }
   }
 }
 </script>
@@ -45,7 +60,12 @@ const addToSlider = (item) => {
           <p class="mt-3 text-espresso-soft max-w-2xl">Approved items that you have saved. They are automatically added to your Clueless Slider for mixing.</p>
         </div>
 
-        <div v-if="!hasItems" class="text-center py-16 rounded-3xl border border-dashed border-espresso/20 bg-white/50">
+        <div v-if="isLoadingCloset" class="flex flex-col items-center justify-center py-20 text-espresso/50 gap-4">
+          <Loader2 class="animate-spin w-8 h-8" />
+          <p class="text-sm font-medium">Memuat koleksi Anda...</p>
+        </div>
+
+        <div v-else-if="!hasItems" class="text-center py-16 rounded-3xl border border-dashed border-espresso/20 bg-white/50">
           <p class="text-espresso-soft">Your closet is empty. Go back to the dashboard to add items!</p>
         </div>
 
@@ -62,10 +82,10 @@ const addToSlider = (item) => {
                  </div>
                  <p class="text-xs font-medium text-espresso truncate w-full text-center mt-auto">{{ item.label }}</p>
                  <div class="mt-2 w-full">
-                   <div v-if="isInSlider(item)" class="text-[10px] uppercase tracking-wider text-tan text-center font-bold bg-tan/10 py-1.5 rounded-lg w-full">
-                     ✓ In Slider
-                   </div>
-                   <button v-else @click="addToSlider(item)" class="text-[10px] uppercase tracking-wider text-white text-center font-bold bg-espresso hover:bg-espresso-soft py-1.5 rounded-lg w-full transition">
+                   <button v-if="isInSlider(item)" @click="toggleSlider(item)" class="text-[10px] uppercase tracking-wider text-tan text-center font-bold bg-tan/10 hover:bg-tan/20 py-1.5 rounded-lg w-full transition">
+                     ✓ In Slider (Remove)
+                   </button>
+                   <button v-else @click="toggleSlider(item)" class="text-[10px] uppercase tracking-wider text-white text-center font-bold bg-espresso hover:bg-espresso-soft py-1.5 rounded-lg w-full transition">
                      + Add to Slider
                    </button>
                  </div>
