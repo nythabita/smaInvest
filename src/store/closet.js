@@ -1,5 +1,5 @@
 import { reactive, ref, computed } from 'vue'
-import { collection, getDocs, doc, updateDoc, addDoc, query, where, serverTimestamp } from 'firebase/firestore'
+import { collection, getDocs, doc, updateDoc, addDoc, query, where, serverTimestamp, deleteDoc, orderBy } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../firebase/config.js'
 import { db } from '../firebase/config.js'
@@ -19,6 +19,11 @@ export const closetItems = ref(
 export const isLoadingCloset = ref(true) // Start as true to avoid empty flash
 export const isClosetLoaded = ref(false)
 
+// ─── Saved Outfits ───
+export const savedOutfits = ref([])
+export const isLoadingOutfits = ref(false)
+export const isOutfitsLoaded = ref(false)
+
 let authListenerAttached = false
 
 export function initClosetAuthListener() {
@@ -28,6 +33,7 @@ export function initClosetAuthListener() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       loadClosetFromFirestore(user.uid)
+      loadSavedOutfitsFromFirestore(user.uid)
     } else {
       isLoadingCloset.value = false
       // Reset to defaults
@@ -38,6 +44,9 @@ export function initClosetAuthListener() {
         isDefault: true
       })))
       isClosetLoaded.value = false
+      
+      savedOutfits.value = []
+      isOutfitsLoaded.value = false
     }
   })
 }
@@ -126,4 +135,89 @@ export async function updateSliderStatus(firestoreId, inSlider) {
   if (!firestoreId) return // skip default items
   const docRef = doc(db, 'clothingItems', firestoreId)
   await updateDoc(docRef, { inSlider })
+}
+
+/**
+ * Delete a clothing item from Firestore and local state
+ */
+export async function deleteItem(item) {
+  // 1. Remove from Firestore
+  if (item.firestoreId) {
+    const docRef = doc(db, 'clothingItems', item.firestoreId)
+    await deleteDoc(docRef)
+  }
+
+  // 2. Remove from local state
+  const index = closetItems.value.findIndex(i => i.id === item.id)
+  if (index !== -1) {
+    closetItems.value.splice(index, 1)
+  }
+
+  // 3. Ensure slider bounds are safe
+  const layer = state.find(l => l.key === item.category)
+  if (layer && layer.activeIndex >= layer.items.length) {
+    layer.activeIndex = Math.max(0, layer.items.length - 1)
+  }
+}
+
+/**
+ * Load user's saved outfits
+ */
+export async function loadSavedOutfitsFromFirestore(userId) {
+  if (!userId) return
+  if (isOutfitsLoaded.value) return
+  
+  isLoadingOutfits.value = true
+  try {
+    const q = query(
+      collection(db, 'savedOutfits'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc')
+    )
+    const snapshot = await getDocs(q)
+    savedOutfits.value = snapshot.docs.map(docSnap => ({
+      id: docSnap.id,
+      ...docSnap.data()
+    }))
+    isOutfitsLoaded.value = true
+  } catch (err) {
+    console.error('Failed to load saved outfits:', err)
+  } finally {
+    isLoadingOutfits.value = false
+  }
+}
+
+/**
+ * Save current outfit combination
+ */
+export async function saveOutfitToFirestore(userId, customName, items) {
+  const fallbackName = `Outfit ${savedOutfits.value.length + 1}`
+  const name = customName.trim() || fallbackName
+  
+  // Store stripped-down versions of items to save space in Firestore
+  const outfitItems = items.map(i => ({
+    id: i.id,
+    label: i.label,
+    category: i.category,
+    image: i.image
+  }))
+
+  const newOutfit = {
+    userId,
+    name,
+    items: outfitItems,
+    createdAt: serverTimestamp()
+  }
+
+  const docRef = await addDoc(collection(db, 'savedOutfits'), newOutfit)
+  
+  // Update local state so it appears immediately
+  const localOutfit = {
+    ...newOutfit,
+    id: docRef.id,
+    createdAt: new Date() // approximate for UI sorting
+  }
+  savedOutfits.value.unshift(localOutfit)
+  
+  return docRef.id
 }

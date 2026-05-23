@@ -27,35 +27,35 @@ const loginWithGoogle = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen overflow-hidden bg-cream flex flex-col items-center justify-center relative">
+  <div class="min-h-screen overflow-hidden bg-surface flex flex-col items-center justify-center relative font-body-md">
     
-    <!-- Decorative blobs -->
-    <div class="pointer-events-none absolute top-[-10%] left-[-10%] h-[30rem] w-[30rem] rounded-full bg-tan/20 blur-3xl"></div>
-    <div class="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[25rem] w-[25rem] rounded-full bg-beige/80 blur-3xl"></div>
+    <!-- Decorative subtle gradient -->
+    <div class="pointer-events-none absolute top-[-10%] left-[-10%] h-[30rem] w-[30rem] rounded-full bg-secondary/5 blur-3xl"></div>
+    <div class="pointer-events-none absolute bottom-[-10%] right-[-10%] h-[25rem] w-[25rem] rounded-full bg-surface-container-high/80 blur-3xl"></div>
 
     <div class="relative z-10 w-full max-w-md px-6 sm:px-8">
       
       <!-- Back to Home -->
       <button 
         @click="router.push('/')" 
-        class="mb-8 inline-flex items-center text-sm font-medium text-espresso-soft hover:text-espresso transition-colors"
+        class="mb-8 inline-flex items-center text-sm font-label-caps tracking-widest text-on-surface-variant hover:text-primary transition-colors"
       >
-        <span class="mr-2">←</span> Kembali ke Beranda
+        <span class="mr-2">←</span> BACK TO HOME
       </button>
       
-      <div class="bg-white/70 backdrop-blur-md rounded-4xl p-8 sm:p-10 shadow-card border border-white">
+      <div class="editorial-card p-8 sm:p-12 shadow-[0_10px_40px_rgba(0,0,0,0.03)] flex flex-col items-center text-center">
         
         <!-- Logo -->
         <div class="flex flex-col items-center mb-8">
-          <div class="h-12 w-12 rounded-xl bg-tan text-cream grid place-items-center shadow-soft mb-4">
-            <Sparkles :size="24" />
+          <div class="h-12 w-12 rounded-full bg-primary text-on-primary grid place-items-center shadow-sm mb-6">
+            <Sparkles :size="24" stroke-width="1.5" />
           </div>
-          <h1 class="font-display text-2xl sm:text-3xl text-espresso tracking-tight text-center">
-            Selamat Datang di <br />
-            <span class="italic text-tan">VirtualCloset</span>
+          <h1 class="font-display-lg text-3xl sm:text-4xl text-primary tracking-tight mb-2">
+            Welcome to <br />
+            <span class="italic text-secondary">VirtualCloset</span>
           </h1>
-          <p class="mt-3 text-sm text-espresso-soft text-center">
-            Masuk untuk menyimpan dan memadukan koleksi pakaian Anda.
+          <p class="mt-4 text-on-surface-variant max-w-xs">
+            Sign in to curate and elevate your digital wardrobe.
           </p>
         </div>
 
@@ -67,10 +67,10 @@ const loginWithGoogle = async () => {
         <button
           @click="loginWithGoogle"
           :disabled="isLoading"
-          class="press group relative w-full inline-flex items-center justify-center gap-3 rounded-full bg-white text-espresso px-6 py-4 text-base font-semibold shadow-soft hover:shadow-card border border-espresso/5 transition-all duration-300 ease-silk disabled:opacity-70"
+          class="w-full inline-flex items-center justify-center gap-3 rounded-full bg-surface-container-lowest text-primary px-6 py-4 text-sm font-label-caps tracking-widest border border-outline-variant/50 shadow-sm hover:border-primary hover:bg-surface transition-all duration-300 disabled:opacity-70"
         >
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="w-5 h-5" />
-          <span>{{ isLoading ? 'Memproses...' : 'Lanjutkan dengan Google' }}</span>
+          <span>{{ isLoading ? 'PROCESSING...' : 'CONTINUE WITH GOOGLE' }}</span>
         </button>
 
       </div>
