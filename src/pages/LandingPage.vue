@@ -56,12 +56,13 @@ const mockupItems = [
   <div class="min-h-screen overflow-x-hidden bg-surface text-on-surface font-body-md">
     <!-- ─────────────────────────  NAV  ───────────────────────── -->
     <header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-outline-variant/30 transition-all duration-300">
-      <div class="mx-auto max-w-[1800px] px-4 sm:px-8 h-16 md:h-20 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-          <div class="h-9 w-9 rounded-full bg-primary text-on-primary grid place-items-center shadow-sm">
-            <Sparkles :size="18" stroke-width="1.5" />
+      <div class="mx-auto max-w-[1800px] px-4 sm:px-8 h-14 md:h-20 flex items-center justify-between">
+        <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+          <div class="h-8 w-8 sm:h-9 sm:w-9 shrink-0 rounded-full bg-primary text-on-primary grid place-items-center shadow-sm">
+            <Sparkles :size="16" class="sm:hidden" stroke-width="1.5" />
+            <Sparkles :size="18" class="hidden sm:block" stroke-width="1.5" />
           </div>
-          <span class="font-display-lg text-lg sm:text-xl tracking-tight text-primary">VIRTUAL CLOSET</span>
+          <span class="font-display-lg text-base sm:text-xl tracking-tight text-primary whitespace-nowrap">VIRTUAL CLOSET</span>
         </div>
         <nav class="hidden md:flex items-center gap-8 text-sm">
           <a href="#preview" class="font-label-caps tracking-widest text-on-surface-variant hover:text-primary transition-colors">PREVIEW</a>
@@ -70,7 +71,7 @@ const mockupItems = [
         </nav>
         <button
           @click="goToDashboard"
-          class="btn-primary flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 text-[10px] sm:text-xs tracking-[0.1em] sm:tracking-[0.2em] shadow-sm"
+          class="btn-primary flex items-center gap-2 px-3.5 py-1.5 sm:px-6 sm:py-2.5 text-[9px] sm:text-xs tracking-[0.05em] sm:tracking-[0.2em] shadow-sm whitespace-nowrap shrink-0"
         >
           OPEN APP
         </button>
