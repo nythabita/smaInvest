@@ -70,7 +70,7 @@ const mockupItems = [
         </nav>
         <button
           @click="goToDashboard"
-          class="btn-primary flex items-center gap-2 px-6 py-2.5 shadow-sm"
+          class="btn-primary flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-2.5 text-[10px] sm:text-xs tracking-[0.1em] sm:tracking-[0.2em] shadow-sm"
         >
           OPEN APP
         </button>
