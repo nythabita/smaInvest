@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@imgly/background-removal": "^1.7.0",
     "firebase": "^12.13.0",
     "lucide-vue-next": "^0.460.0",
     "motion-v": "^0.10.0",

@@ -85,7 +85,7 @@ export async function loadClosetFromFirestore(userId) {
   isLoadingCloset.value = true
 
   try {
-    const q = query(collection(db, 'clothingItems'), where('userId', '==', userId))
+    const q = query(collection(db, 'closet'), where('userId', '==', userId))
     const snapshot = await getDocs(q)
 
     const firestoreItems = snapshot.docs.map(docSnap => ({
@@ -117,7 +117,7 @@ export async function loadClosetFromFirestore(userId) {
  * Returns the Firestore document ID
  */
 export async function saveItemToFirestore(userId, item) {
-  const docRef = await addDoc(collection(db, 'clothingItems'), {
+  const docRef = await addDoc(collection(db, 'closet'), {
     userId,
     name: item.label,
     category: item.category,
@@ -133,7 +133,7 @@ export async function saveItemToFirestore(userId, item) {
  */
 export async function updateSliderStatus(firestoreId, inSlider) {
   if (!firestoreId) return // skip default items
-  const docRef = doc(db, 'clothingItems', firestoreId)
+  const docRef = doc(db, 'closet', firestoreId)
   await updateDoc(docRef, { inSlider })
 }
 
@@ -141,9 +141,15 @@ export async function updateSliderStatus(firestoreId, inSlider) {
  * Delete a clothing item from Firestore and local state
  */
 export async function deleteItem(item) {
+  const user = auth.currentUser
+  if (!user) {
+    console.error('User not logged in, cannot delete item')
+    return
+  }
+
   // 1. Remove from Firestore
   if (item.firestoreId) {
-    const docRef = doc(db, 'clothingItems', item.firestoreId)
+    const docRef = doc(db, 'closet', item.firestoreId)
     await deleteDoc(docRef)
   }
 
@@ -196,15 +202,16 @@ export async function saveOutfitToFirestore(userId, customName, items) {
   
   // Store stripped-down versions of items to save space in Firestore
   const outfitItems = items.map(i => ({
-    id: i.id,
-    label: i.label,
-    category: i.category,
-    image: i.image
+    id: i.id || Date.now() + Math.random(), // fallback id
+    label: i.label || "",
+    category: i.category || "",
+    image: i.image || "",
+    svg: i.svg || ""
   }))
 
   const newOutfit = {
-    userId,
-    name,
+    userId: userId || "",
+    name: name || "",
     items: outfitItems,
     createdAt: serverTimestamp()
   }
@@ -221,3 +228,27 @@ export async function saveOutfitToFirestore(userId, customName, items) {
   
   return docRef.id
 }
+
+/**
+ * Delete a saved outfit from Firestore and local state
+ */
+export async function deleteOutfit(outfit) {
+  const user = auth.currentUser
+  if (!user) {
+    console.error('User not logged in, cannot delete outfit')
+    return
+  }
+
+  // 1. Remove from Firestore
+  if (outfit.id) {
+    const docRef = doc(db, 'savedOutfits', outfit.id)
+    await deleteDoc(docRef)
+  }
+
+  // 2. Remove from local state
+  const index = savedOutfits.value.findIndex(o => o.id === outfit.id)
+  if (index !== -1) {
+    savedOutfits.value.splice(index, 1)
+  }
+}
+

@@ -22,14 +22,14 @@ defineProps({
     ></div>
 
     <!-- The illustration -->
-    <div class="relative h-full w-full grid place-items-center p-3">
+    <div :class="['absolute top-0 left-0 right-0 flex items-center justify-center p-4', !flat ? 'bottom-12' : 'bottom-0']">
 
       <!-- CAMERA IMAGE -->
       <img
         v-if="item.image"
         :src="item.image"
         alt="Captured outfit"
-        class="w-[78%] h-[78%] object-cover rounded-2xl"
+        class="max-w-full max-h-full object-contain object-center drop-shadow-sm"
       />
 
       <!-- SVG DEFAULT -->

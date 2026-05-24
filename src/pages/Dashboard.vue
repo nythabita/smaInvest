@@ -1,12 +1,14 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
-import { removeBackground } from '@imgly/background-removal'
 import {
   Sparkles,
   Shuffle,
   Lock,
   LockOpen,
   ArrowRight,
+  Check,
+  Eye,
+  EyeOff
 } from 'lucide-vue-next'
 import OutfitItem from '../components/OutfitItem.vue'
 import CameraCapture from '../components/CameraCapture.vue'
@@ -16,6 +18,8 @@ import { useRouter } from 'vue-router'
 import { signOut, onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import { uploadToCloudinary } from '../services/cloudinary.js'
+
+const showHeadwear = ref(true)
 
 const router = useRouter()
 
@@ -57,6 +61,7 @@ const isSaving = ref(false)
 // Background removal state
 const isProcessingBg = ref(false)
 const bgRemovalError = ref('')
+const isBgRemoved = ref(false)
 const originalImage = ref(null) // keep original in case bg removal fails
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
@@ -66,36 +71,106 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 /*  Background removal                                                        */
 /* -------------------------------------------------------------------------- */
 
+function resizeImage(dataUrl, maxWidth = 512) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      let width = img.width
+      let height = img.height
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width)
+        width = maxWidth
+      }
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+      resolve(canvas.toDataURL('image/png')) // Use PNG to preserve transparency
+    }
+    img.onerror = reject
+    img.src = dataUrl
+  })
+}
+
 async function processBackgroundRemoval(imageDataUrl) {
+  console.log("capture received")
   originalImage.value = imageDataUrl
   pendingCapturedImage.value = imageDataUrl  // show original immediately
   isProcessingBg.value = true
   bgRemovalError.value = ''
+  isBgRemoved.value = false
 
   try {
-    // Convert data URL to blob for the library
-    const response = await fetch(imageDataUrl)
+    // 1. Resize before processing to save memory/time
+    const resizedDataUrl = await resizeImage(imageDataUrl, 512)
+    const response = await fetch(resizedDataUrl)
     const blob = await response.blob()
 
-    const resultBlob = await removeBackground(blob, {
-      progress: (key, current, total) => {
-        // Optional: could track progress here
+    console.log("image size/type before remove bg:", blob.size, blob.type)
+
+    // 2. Add timeout protection (25s)
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('TIMEOUT')), 25000)
+    )
+
+    console.log("remove bg via API started")
+    const formData = new FormData()
+    // Poof.bg API requires 'image_file' field
+    formData.append('image_file', blob, 'image.png')
+    formData.append('size', 'preview')
+    
+    const apiKey = import.meta.env.VITE_REMOVE_BG_API_KEY
+    if (!apiKey) throw new Error('API key is missing in .env')
+
+    // Using Poof.bg API
+    const bgRemovalPromise = fetch('https://api.poof.bg/v1/remove', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+      },
+      body: formData
+    }).then(async res => {
+      if (!res.ok) {
+        const errText = await res.text()
+        throw new Error('API Error: ' + res.status + ' - ' + errText)
       }
+      return res.blob()
     })
+
+    const resultBlob = await Promise.race([bgRemovalPromise, timeoutPromise])
+
+    if (!showCamera.value) {
+      console.log("remove bg aborted (user cancelled)")
+      return // Abort if cancelled during processing
+    }
+
+    console.log("remove bg finished")
+    console.log("final output type/size:", resultBlob.type, resultBlob.size)
 
     // Convert result blob back to data URL for display
     const reader = new FileReader()
     reader.onload = (e) => {
+      if (!showCamera.value) return // Abort if cancelled during read
       pendingCapturedImage.value = e.target.result
+      isBgRemoved.value = true
       isProcessingBg.value = false
     }
     reader.readAsDataURL(resultBlob)
   } catch (err) {
-    console.error('Background removal failed:', err)
-    bgRemovalError.value = 'Background removal gagal. Menggunakan gambar asli.'
-    // Keep original image — don't block the user
-    pendingCapturedImage.value = imageDataUrl
+    if (!showCamera.value) return // Ignore errors if cancelled
+
+    console.error('remove bg failed:', err)
+    console.log("remove bg failed")
+    bgRemovalError.value = 'Background removal failed. Please try again.'
+    // Keep original image visible but don't allow saving (isBgRemoved stays false)
     isProcessingBg.value = false
+  }
+}
+
+function retryBackgroundRemoval() {
+  if (originalImage.value) {
+    processBackgroundRemoval(originalImage.value)
   }
 }
 
@@ -163,22 +238,47 @@ function toggleLock(layerIdx) {
 const isShuffling = ref(false)
 const outfitName = ref('')
 const isSavingOutfit = ref(false)
-const outfitSaveSuccess = ref(false)
+const saveOutfitStatus = ref('idle') // 'idle' | 'saving' | 'success' | 'error'
 
 async function handleSaveOutfit() {
   const user = auth.currentUser
-  if (!user) return
+  if (!user) {
+    alert('Please login first')
+    return
+  }
+  if (isSavingOutfit.value) return // Prevent double click duplicate saves
   isSavingOutfit.value = true
-  outfitSaveSuccess.value = false
+  saveOutfitStatus.value = 'saving'
 
   const currentItems = state.map(layer => layer.items[layer.activeIndex]).filter(Boolean)
+  
+  // 1 & 2. Convert from Proxy and sanitize every field to prevent undefined
+  const sanitizedItems = currentItems.map(item => ({
+    id: item.id || Date.now() + Math.random(),
+    label: item.label || item.name || "",
+    category: item.category || "",
+    image: item.image || item.imageUrl || "",
+    svg: item.svg || ""
+  }))
+  
+  // Ensure completely plain object (no Vue Proxies)
+  const plainItems = JSON.parse(JSON.stringify(sanitizedItems))
+
   try {
-    await saveOutfitToFirestore(user.uid, outfitName.value, currentItems)
-    outfitSaveSuccess.value = true
+    console.log('--- Debug Save Outfit ---')
+    console.log('auth.currentUser.uid:', user.uid)
+    console.log('Sanitized Payload items:', plainItems) // 4. Log final sanitized payload
+    
+    // 5. Call save function
+    await saveOutfitToFirestore(user.uid, outfitName.value, plainItems)
+    console.log('Successfully saved outfit!') // 6. Log success
+    saveOutfitStatus.value = 'success'
     outfitName.value = ''
-    setTimeout(() => { outfitSaveSuccess.value = false }, 3000)
+    setTimeout(() => { saveOutfitStatus.value = 'idle' }, 2000)
   } catch (e) {
     console.error('Failed to save outfit:', e)
+    saveOutfitStatus.value = 'error'
+    setTimeout(() => { saveOutfitStatus.value = 'idle' }, 3000)
   } finally {
     isSavingOutfit.value = false
   }
@@ -249,6 +349,12 @@ const currentOutfit = computed(() =>
 )
 
 async function saveToCloset() {
+  const user = auth.currentUser
+  if (!user) {
+    alert('Please login first')
+    return
+  }
+  
   if (!pendingCapturedImage.value) return
   saveError.value = ''
 
@@ -328,6 +434,7 @@ function toggleCamera() {
     uploadError.value = ''
     saveError.value = ''
     bgRemovalError.value = ''
+    isBgRemoved.value = false
     isProcessingBg.value = false
     inputMode.value = 'camera'
     if (fileInputRef.value) {
@@ -364,7 +471,8 @@ function handleFileUpload(event) {
 
   const reader = new FileReader()
   reader.onload = (e) => {
-    processBackgroundRemoval(e.target.result)
+    originalImage.value = e.target.result
+    pendingCapturedImage.value = e.target.result
   }
   reader.readAsDataURL(file)
   event.target.value = ''
@@ -386,14 +494,7 @@ function handleFileUpload(event) {
           </button>
         </div>
         <div class="flex items-center gap-2">
-          <button
-            @click="shuffleOutfit"
-            :disabled="isShuffling"
-            class="press group inline-flex items-center gap-2 rounded-full bg-primary text-on-primary px-4 py-2 text-sm font-medium shadow-sm hover:bg-primary/90 disabled:opacity-60"
-          >
-            <Shuffle :size="14" :class="['transition-transform duration-500 ease-silk', isShuffling ? 'rotate-180' : 'group-hover:rotate-12']" />
-            Shuffle
-          </button>
+
           <button
             @click="toggleCamera"
             class="press inline-flex items-center gap-2 rounded-full bg-secondary text-on-secondary px-4 py-2 text-sm font-medium shadow-sm hover:bg-secondary/90"
@@ -474,9 +575,15 @@ function handleFileUpload(event) {
                 <div class="rounded-2xl overflow-hidden border border-outline-variant/30 bg-surface-container aspect-[3/4] relative">
                   <CameraCapture
                     @capture="(imageData) => {
-                      processBackgroundRemoval(imageData)
+                      originalImage = imageData
+                      pendingCapturedImage = imageData
                     }"
                   />
+                </div>
+                <div class="mt-6 flex justify-center">
+                  <button @click="toggleCamera" class="px-6 py-2.5 rounded-full font-semibold text-on-surface-variant hover:bg-surface-container transition-colors">
+                    Cancel
+                  </button>
                 </div>
               </div>
 
@@ -508,6 +615,11 @@ function handleFileUpload(event) {
                     <p class="text-xs text-on-surface-variant">JPG, PNG, WebP format.<br/>Max 5MB.</p>
                   </div>
                 </button>
+                <div class="mt-6 flex justify-center w-full">
+                  <button @click="toggleCamera" class="px-6 py-2.5 rounded-full font-semibold text-on-surface-variant hover:bg-surface-container transition-colors">
+                    Cancel
+                  </button>
+                </div>
               </div>
             </template>
         
@@ -524,8 +636,13 @@ function handleFileUpload(event) {
                   </div>
                 </div>
                 <div class="text-center">
-                  <p class="font-display-lg text-xl text-primary mb-2">Refining Image</p>
-                  <p class="text-sm text-on-surface-variant">Removing background for a clean cut...</p>
+                  <p class="font-display-lg text-xl text-primary mb-2">Removing background...</p>
+                  <p class="text-sm text-on-surface-variant">This may take a few seconds.</p>
+                </div>
+                <div class="mt-2">
+                  <button @click="toggleCamera" class="px-6 py-2.5 rounded-full font-semibold text-on-surface-variant hover:bg-surface-container transition-colors border border-outline-variant/30">
+                    Cancel
+                  </button>
                 </div>
               </div>
 
@@ -537,8 +654,18 @@ function handleFileUpload(event) {
                   <div class="relative w-full max-w-[240px] sm:max-w-sm h-[25vh] sm:h-auto sm:aspect-[3/4] rounded-2xl overflow-hidden border border-outline-variant/30 bg-surface-container shadow-inner" style="background: repeating-conic-gradient(#e8e8e6 0% 25%, #f9f9f7 0% 50%) 50% / 15px 15px">
                     <img :src="pendingCapturedImage" class="absolute inset-0 w-full h-full object-contain p-2 hover:scale-105 transition-transform duration-500" />
                   </div>
-                  <div v-if="bgRemovalError" class="text-[11px] text-secondary bg-secondary/5 rounded-lg px-3 py-2 text-center border border-secondary/20 w-full max-w-[240px]">
-                    {{ bgRemovalError }}
+                  <div v-if="bgRemovalError" class="flex flex-col items-center gap-2 mt-2 w-full max-w-[240px]">
+                    <div class="text-[11px] text-secondary bg-secondary/5 rounded-lg px-3 py-2 text-center border border-secondary/20 w-full">
+                      {{ bgRemovalError }}
+                    </div>
+                    <button @click="retryBackgroundRemoval" class="text-xs font-semibold text-on-primary bg-primary px-4 py-2 rounded-full shadow-sm hover:opacity-90 transition">
+                      Retry Removal
+                    </button>
+                  </div>
+                  <div v-else-if="!isBgRemoved" class="flex flex-col items-center mt-2 w-full max-w-[240px]">
+                    <button @click="processBackgroundRemoval(originalImage)" class="text-xs font-semibold text-on-primary bg-primary px-4 py-2 rounded-full shadow-sm hover:opacity-90 transition flex items-center gap-2">
+                      <Sparkles :size="14" /> Remove Background
+                    </button>
                   </div>
                 </div>
 
@@ -610,18 +737,24 @@ function handleFileUpload(event) {
                   </div>
 
                   <!-- Action Buttons pushed to bottom -->
-                  <div class="flex gap-3 mt-8 sm:mt-auto pt-4 border-t border-outline-variant/20">
+                  <div class="flex flex-wrap sm:flex-nowrap gap-3 mt-8 sm:mt-auto pt-4 border-t border-outline-variant/20">
+                    <button
+                      @click="toggleCamera"
+                      class="px-4 py-3.5 rounded-full text-on-surface-variant font-semibold hover:bg-surface-container transition-colors shrink-0"
+                    >
+                      Cancel
+                    </button>
                     <button
                       @click="pendingCapturedImage = null"
                       :disabled="isSaving"
-                      class="flex-1 px-4 py-3.5 rounded-full bg-surface-container text-primary font-semibold hover:bg-surface-container-high transition-colors border border-outline-variant/30 disabled:opacity-50"
+                      class="flex-1 px-4 py-3.5 rounded-full bg-surface-container text-primary font-semibold hover:bg-surface-container-high transition-colors border border-outline-variant/30 disabled:opacity-50 min-w-[100px]"
                     >
                       Retake
                     </button>
                     <button
                       @click="saveToCloset"
                       :disabled="isSaving"
-                      class="flex-[2] px-4 py-3.5 rounded-full btn-primary font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm hover:shadow-md"
+                      class="flex-[2] px-4 py-3.5 rounded-full btn-primary font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm hover:shadow-md min-w-[140px]"
                     >
                       <span v-if="isSaving" class="w-4 h-4 border-2 border-on-primary/30 border-t-on-primary rounded-full animate-spin"></span>
                       {{ isSaving ? 'Saving...' : 'Save to Closet' }}
@@ -646,19 +779,6 @@ function handleFileUpload(event) {
             <p class="mt-3 max-w-xl text-on-surface-variant">Three layers. Independent control. Lock what you love, shuffle the rest. Built to feel like a styling tool — not a carousel.</p>
           </div>
 
-          <div class="reveal flex items-center gap-2">
-            <button
-              @click="shuffleOutfit"
-              :disabled="isShuffling"
-              class="press group inline-flex items-center gap-2 rounded-full btn-secondary px-5 py-3 text-sm font-semibold disabled:opacity-60"
-            >
-              <Shuffle
-                :size="16"
-                :class="['transition-transform duration-500 ease-silk', isShuffling ? 'rotate-180 scale-110' : 'group-hover:rotate-12']"
-              />
-              Shuffle Outfit
-            </button>
-          </div>
         </div>
 
         <!-- Slider & Preview Grid -->
@@ -737,20 +857,59 @@ function handleFileUpload(event) {
           </div>
 
           <!-- Right: Live Preview Stack (5 columns on large screens, sticky on scroll) -->
-          <div class="lg:col-span-5 order-first lg:order-last lg:sticky lg:top-24 space-y-6">
-            <div class="reveal relative w-full max-w-[280px] sm:max-w-sm mx-auto aspect-[3/4] rounded-[2.5rem] glass-panel p-4">
-              <!-- Stack of items -->
-              <div class="absolute inset-0 grid grid-rows-3 gap-2 p-3 pb-16">
-                <div class="relative w-full h-full">
-                  <OutfitItem v-if="state[0] && state[0].items[state[0].activeIndex]" :item="state[0].items[state[0].activeIndex]" :active="false" flat />
-                </div>
-                <div class="relative w-full h-full scale-[1.05] z-10 drop-shadow-md">
-                  <OutfitItem v-if="state[1] && state[1].items[state[1].activeIndex]" :item="state[1].items[state[1].activeIndex]" :active="true" flat />
-                </div>
-                <div class="relative w-full h-full">
-                  <OutfitItem v-if="state[2] && state[2].items[state[2].activeIndex]" :item="state[2].items[state[2].activeIndex]" :active="false" flat />
-                </div>
+          <div class="lg:col-span-5 order-first lg:order-last lg:sticky lg:top-24 flex flex-col gap-6">
+            
+            <!-- Current outfit summary -->
+            <div class="reveal flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 editorial-card px-5 sm:px-6 py-5 w-full">
+              <div class="flex-1 min-w-0">
+                <p class="font-label-caps tracking-[0.18em] text-secondary">YOUR LOOK</p>
+                <p class="mt-1 font-headline-md text-lg text-primary truncate">{{ currentOutfit }}</p>
               </div>
+              
+              <div class="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+                <button
+                  @click="showHeadwear = !showHeadwear"
+                  :class="[
+                    'press inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold w-full sm:w-auto justify-center transition-colors',
+                    showHeadwear ? 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-primary/30 hover:text-primary' : 'bg-secondary/10 text-secondary border-secondary/30'
+                  ]"
+                >
+                  <component :is="showHeadwear ? Eye : EyeOff" :size="14" />
+                  {{ showHeadwear ? 'Hide Headwear' : 'Show Headwear' }}
+                </button>
+                <button
+                  @click="shuffleOutfit"
+                  class="press inline-flex items-center gap-2 rounded-full btn-primary px-4 py-2 text-sm font-semibold w-full sm:w-auto justify-center"
+                >
+                  <Shuffle :size="14" />
+                  Try another
+                </button>
+              </div>
+            </div>
+
+            <div class="w-full max-w-[280px] sm:max-w-sm mx-auto flex flex-col gap-3">
+              <!-- Increased canvas height on desktop, keeping aspect ratio on mobile -->
+              <div class="reveal relative w-full aspect-[3/4] sm:aspect-auto sm:h-[540px] rounded-[2.5rem] glass-panel p-6 overflow-hidden">
+                <!-- Stack of items (Composition board) -->
+                <div class="absolute inset-0 w-full h-full pb-16 pt-2">
+                  <!-- Headwear: small, near top area, subtle spacing -->
+                  <transition name="fade">
+                    <div v-show="showHeadwear" class="absolute left-1/2 -translate-x-1/2 top-[4%] w-[35%] h-[20%] flex items-center justify-center transition-all duration-700 ease-silk">
+                      <OutfitItem v-if="state[0] && state[0].items[state[0].activeIndex]" :item="state[0].items[state[0].activeIndex]" :active="false" flat />
+                    </div>
+                  </transition>
+                  <!-- Tops: primary focal point, shifts upward when headwear is hidden -->
+                  <div :class="[
+                    'absolute left-1/2 -translate-x-1/2 w-[85%] h-[50%] z-10 flex items-center justify-center drop-shadow-lg transition-all duration-700 ease-silk',
+                    showHeadwear ? 'top-[20%]' : 'top-[10%]'
+                  ]">
+                    <OutfitItem v-if="state[1] && state[1].items[state[1].activeIndex]" :item="state[1].items[state[1].activeIndex]" :active="true" flat />
+                  </div>
+                  <!-- Bottoms: visible grounding layer, anchors outfit -->
+                  <div class="absolute left-1/2 -translate-x-1/2 top-[52%] w-[75%] h-[45%] flex items-center justify-center transition-all duration-700 ease-silk">
+                    <OutfitItem v-if="state[2] && state[2].items[state[2].activeIndex]" :item="state[2].items[state[2].activeIndex]" :active="false" flat />
+                  </div>
+                </div>
               
               <!-- Bottom floating badge -->
               <div class="absolute bottom-4 left-4 right-4 rounded-2xl bg-surface-container-lowest/90 backdrop-blur-md px-4 py-3 text-xs text-on-surface-variant border border-outline-variant/30 shadow-sm flex items-center justify-between">
@@ -763,47 +922,17 @@ function handleFileUpload(event) {
                 </div>
               </div>
             </div>
-          </div>
 
-        </div>
-
-        <!-- Current outfit summary -->
-        <div class="reveal mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 editorial-card px-5 sm:px-7 py-5">
-          <div class="flex-1">
-            <p class="font-label-caps tracking-[0.18em] text-secondary">YOUR LOOK</p>
-            <p class="mt-1 font-headline-md text-xl text-primary">{{ currentOutfit }}</p>
-          </div>
-          
-          <div class="flex flex-col sm:flex-row items-center gap-3">
             <!-- Save Outfit Inline Form -->
-            <div class="flex items-center gap-2 w-full sm:w-auto">
+            <div class="reveal flex items-center gap-2">
               <input 
                 v-model="outfitName" 
                 type="text" 
                 placeholder="Name this look..." 
-                class="px-4 py-2.5 rounded-full border border-outline-variant/30 bg-surface-container-lowest text-primary text-sm outline-none focus:ring-1 focus:ring-primary focus:border-primary w-full sm:w-40 transition-all"
+                class="flex-1 px-4 py-2.5 rounded-full border border-outline-variant/30 bg-surface-container-lowest text-primary text-sm outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all min-w-0"
               />
               <button
                 @click="handleSaveOutfit"
                 :disabled="isSavingOutfit"
-                class="press inline-flex items-center justify-center rounded-full btn-secondary px-4 py-2.5 text-sm font-semibold disabled:opacity-50 whitespace-nowrap"
-              >
-                <span v-if="outfitSaveSuccess">Saved!</span>
-                <span v-else-if="isSavingOutfit">Saving...</span>
-                <span v-else>Save</span>
-              </button>
-            </div>
-
-            <button
-              @click="shuffleOutfit"
-              class="press inline-flex items-center gap-2 rounded-full btn-primary px-5 py-2.5 text-sm font-semibold w-full sm:w-auto justify-center"
-            >
-              <Shuffle :size="14" />
-              Try another
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-</template>
+                :class="[
+                  'press shrink-0 inline-flex items-center justify-center 

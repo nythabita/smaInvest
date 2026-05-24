@@ -9,6 +9,7 @@ import {
   isLoadingCloset, 
   initClosetAuthListener, 
   deleteItem, 
+  deleteOutfit,
   savedOutfits, 
   isLoadingOutfits 
 } from '../store/closet.js'
@@ -49,12 +50,23 @@ const toggleSlider = async (item) => {
 }
 
 const handleDeleteItem = async (item) => {
-  if (confirm(`Are you sure you want to delete "${item.label}" from your closet?`)) {
+  if (confirm("Are you sure you want to delete this?")) {
     try {
       await deleteItem(item)
     } catch (err) {
       console.error('Failed to delete item:', err)
       alert('Failed to delete item. Please try again.')
+    }
+  }
+}
+
+const handleDeleteOutfit = async (outfit) => {
+  if (confirm("Are you sure you want to delete this?")) {
+    try {
+      await deleteOutfit(outfit)
+    } catch (err) {
+      console.error('Failed to delete outfit:', err)
+      alert('Failed to delete outfit. Please try again.')
     }
   }
 }
@@ -137,7 +149,7 @@ const formatDate = (dateValue) => {
                  <button 
                    v-if="!item.isDefault"
                    @click="handleDeleteItem(item)"
-                   class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary/10 transition-colors z-10 opacity-0 group-hover:opacity-100"
+                   class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary/10 transition-colors z-10"
                    title="Delete item"
                  >
                    <Trash2 :size="14" />
@@ -176,9 +188,18 @@ const formatDate = (dateValue) => {
             <div v-for="outfit in savedOutfits" :key="outfit.id" class="editorial-card p-5 group hover:border-primary/30 transition-colors">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="font-headline-md text-xl text-primary truncate pr-4">{{ outfit.name }}</h3>
-                <div class="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-on-surface-variant shrink-0">
-                  <CalendarDays :size="12" />
-                  <span>{{ formatDate(outfit.createdAt) }}</span>
+                <div class="flex items-center gap-3 shrink-0">
+                  <div class="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-on-surface-variant">
+                    <CalendarDays :size="12" />
+                    <span>{{ formatDate(outfit.createdAt) }}</span>
+                  </div>
+                  <button 
+                    @click="handleDeleteOutfit(outfit)"
+                    class="text-on-surface-variant hover:text-secondary transition-colors"
+                    title="Delete outfit"
+                  >
+                    <Trash2 :size="14" />
+                  </button>
                 </div>
               </div>
               
