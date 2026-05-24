@@ -54,41 +54,43 @@ body::before {
   border-color: #c4c7c7;
 }
 
-/* Luxury buttons */
-.btn-primary {
-  background-color: #b61729; /* secondary red */
-  color: #ffffff;
-  font-family: "Hanken Grotesk", sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  box-shadow: 0 4px 10px rgba(182, 23, 41, 0.2);
-  transition: all 200ms ease;
-  font-weight: 600;
-  font-size: 12px;
-}
-.btn-primary:hover {
-  background-color: #d9343e;
-  transform: scale(1.02);
-}
+@layer components {
+  /* Luxury buttons */
+  .btn-primary {
+    background-color: #b61729; /* secondary red */
+    color: #ffffff;
+    font-family: "Hanken Grotesk", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    box-shadow: 0 4px 10px rgba(182, 23, 41, 0.2);
+    transition: all 200ms ease;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .btn-primary:hover {
+    background-color: #d9343e;
+    transform: scale(1.02);
+  }
 
-.btn-secondary {
-  background-color: transparent;
-  color: #1a1c1b;
-  font-family: "Hanken Grotesk", sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  border: 1px solid #c4c7c7;
-  transition: all 200ms ease;
-  font-weight: 500;
-  font-size: 12px;
-}
-.btn-secondary:hover {
-  border-color: #1a1c1b;
-  background-color: #f4f4f2;
+  .btn-secondary {
+    background-color: transparent;
+    color: #1a1c1b;
+    font-family: "Hanken Grotesk", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    border: 1px solid #c4c7c7;
+    transition: all 200ms ease;
+    font-weight: 500;
+    font-size: 12px;
+  }
+  .btn-secondary:hover {
+    border-color: #1a1c1b;
+    background-color: #f4f4f2;
+  }
 }
 
 /* Tiny label/badge */
