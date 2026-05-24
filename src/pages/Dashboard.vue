@@ -345,7 +345,11 @@ onBeforeUnmount(() => {
 /* -------------------------------------------------------------------------- */
 
 const currentOutfit = computed(() =>
-  state.map((l) => l.items[l.activeIndex]?.label).filter(Boolean).join(' · ')
+  state
+    .filter((_, idx) => idx === 0 ? showHeadwear.value : true)
+    .map((l) => l.items[l.activeIndex]?.label)
+    .filter(Boolean)
+    .join(' · ')
 )
 
 async function saveToCloset() {
@@ -799,19 +803,33 @@ function handleFileUpload(event) {
                   <span class="hidden sm:inline text-xs text-on-surface-variant">· {{ layer.items[layer.activeIndex]?.label }}</span>
                 </div>
 
-                <button
-                  @click="toggleLock(idx)"
-                  :aria-pressed="layer.locked"
-                  :class="[
-                    'press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-all duration-300',
-                    layer.locked
-                      ? 'bg-secondary text-on-secondary border-secondary shadow-[0_0_15px_rgba(182,23,41,0.3)]'
-                      : 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-primary/30 hover:text-primary'
-                  ]"
-                >
-                  <component :is="layer.locked ? Lock : LockOpen" :size="13" />
-                  {{ layer.locked ? 'Locked' : 'Lock' }}
-                </button>
+                <div class="flex items-center gap-2">
+                  <button
+                    v-if="idx === 0"
+                    @click="showHeadwear = !showHeadwear"
+                    :class="[
+                      'press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-all duration-300',
+                      showHeadwear ? 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-primary/30 hover:text-primary' : 'bg-secondary/10 text-secondary border-secondary/30'
+                    ]"
+                  >
+                    <component :is="showHeadwear ? Eye : EyeOff" :size="13" />
+                    <span class="hidden sm:inline">{{ showHeadwear ? 'Hide' : 'Show' }}</span>
+                  </button>
+
+                  <button
+                    @click="toggleLock(idx)"
+                    :aria-pressed="layer.locked"
+                    :class="[
+                      'press inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border transition-all duration-300',
+                      layer.locked
+                        ? 'bg-secondary text-on-secondary border-secondary shadow-[0_0_15px_rgba(182,23,41,0.3)]'
+                        : 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-primary/30 hover:text-primary'
+                    ]"
+                  >
+                    <component :is="layer.locked ? Lock : LockOpen" :size="13" />
+                    {{ layer.locked ? 'Locked' : 'Lock' }}
+                  </button>
+                </div>
               </div>
 
               <!-- The rail -->
@@ -866,22 +884,12 @@ function handleFileUpload(event) {
                 <p class="mt-1 font-headline-md text-lg text-primary truncate">{{ currentOutfit }}</p>
               </div>
               
-              <div class="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-                <button
-                  @click="showHeadwear = !showHeadwear"
-                  :class="[
-                    'press inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold w-full sm:w-auto justify-center transition-colors',
-                    showHeadwear ? 'bg-surface-container text-on-surface-variant border-outline-variant/30 hover:border-primary/30 hover:text-primary' : 'bg-secondary/10 text-secondary border-secondary/30'
-                  ]"
-                >
-                  <component :is="showHeadwear ? Eye : EyeOff" :size="14" />
-                  {{ showHeadwear ? 'Hide Headwear' : 'Show Headwear' }}
-                </button>
+              <div class="flex flex-col sm:flex-row items-center shrink-0">
                 <button
                   @click="shuffleOutfit"
-                  class="press inline-flex items-center gap-2 rounded-full btn-primary px-4 py-2 text-sm font-semibold w-full sm:w-auto justify-center"
+                  class="press inline-flex items-center gap-1.5 rounded-full btn-primary px-3 py-1.5 text-xs font-semibold w-full sm:w-auto justify-center"
                 >
-                  <Shuffle :size="14" />
+                  <Shuffle :size="13" />
                   Try another
                 </button>
               </div>
@@ -906,7 +914,7 @@ function handleFileUpload(event) {
                     <OutfitItem v-if="state[1] && state[1].items[state[1].activeIndex]" :item="state[1].items[state[1].activeIndex]" :active="true" flat />
                   </div>
                   <!-- Bottoms: visible grounding layer, anchors outfit -->
-                  <div class="absolute left-1/2 -translate-x-1/2 top-[52%] w-[75%] h-[45%] flex items-center justify-center transition-all duration-700 ease-silk">
+                  <div class="absolute left-1/2 -translate-x-1/2 top-[46%] w-[95%] h-[60%] flex items-center justify-center transition-all duration-700 ease-silk">
                     <OutfitItem v-if="state[2] && state[2].items[state[2].activeIndex]" :item="state[2].items[state[2].activeIndex]" :active="false" flat />
                   </div>
                 </div>
@@ -935,4 +943,25 @@ function handleFileUpload(event) {
                 @click="handleSaveOutfit"
                 :disabled="isSavingOutfit"
                 :class="[
-                  'press shrink-0 inline-flex items-center justify-center 
+                  'press shrink-0 inline-flex items-center justify-center rounded-full px-4 py-2.5 text-sm font-semibold disabled:opacity-50 whitespace-nowrap transition-colors',
+                  saveOutfitStatus === 'success' ? 'bg-green-600/10 text-green-600 hover:bg-green-600/20 border border-green-600/30' : 
+                  saveOutfitStatus === 'error' ? 'bg-secondary/10 text-secondary hover:bg-secondary/20 border border-secondary/30' : 
+                  'btn-secondary'
+                ]"
+              >
+                <span v-if="saveOutfitStatus === 'success'" class="flex items-center gap-1.5"><Check :size="14" /> Saved!</span>
+                <span v-else-if="saveOutfitStatus === 'saving'" class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span> Saving...</span>
+                <span v-else-if="saveOutfitStatus === 'error'">Failed to Save</span>
+                <span v-else>Save Outfit</span>
+              </button>
+            </div>
+            </div>
+          </div>
+
+        </div>
+
+
+      </div>
+    </section>
+  </div>
+</template>
