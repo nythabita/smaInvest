@@ -11,7 +11,7 @@ defineProps({
   <div
     :class="[
       'relative h-full w-full rounded-3xl overflow-hidden transition-all duration-500 ease-silk',
-      flat ? 'bg-transparent' : 'bg-gradient-to-b from-white to-beige/60 border border-espresso/5'
+      flat ? 'bg-transparent' : 'bg-surface-container-lowest border border-outline-variant/30'
     ]"
   >
     <!-- Soft tint background derived from the item -->
@@ -22,14 +22,14 @@ defineProps({
     ></div>
 
     <!-- The illustration -->
-    <div class="relative h-full w-full grid place-items-center p-3">
+    <div :class="['absolute top-0 left-0 right-0 flex items-center justify-center p-4', !flat ? 'bottom-12' : 'bottom-0']">
 
       <!-- CAMERA IMAGE -->
       <img
         v-if="item.image"
         :src="item.image"
         alt="Captured outfit"
-        class="w-[78%] h-[78%] object-cover rounded-2xl"
+        class="max-w-full max-h-full object-contain object-center drop-shadow-sm"
       />
 
       <!-- SVG DEFAULT -->
@@ -47,8 +47,8 @@ defineProps({
       :class="[
         'absolute bottom-2 left-2 right-2 flex items-center justify-between rounded-2xl px-3 py-1.5 text-[11px] backdrop-blur border transition-colors duration-500',
         active
-          ? 'bg-espresso text-cream border-espresso'
-          : 'bg-cream/80 text-espresso-soft border-espresso/5'
+          ? 'bg-primary text-on-primary border-primary'
+          : 'bg-surface-container-high/80 text-on-surface-variant border-outline-variant/30'
       ]"
     >
       <span class="font-medium truncate">{{ item.label }}</span>
