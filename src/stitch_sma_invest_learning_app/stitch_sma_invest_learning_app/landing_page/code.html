@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SMA Invest - Belajar Investasi dari Sekolah</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "warning": "#F5C542",
+                        "primary-fixed": "#9ef5be",
+                        "white": "#FFFFFF",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#b6ccbe",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#aeffca",
+                        "outline-variant": "#bec9bf",
+                        "on-background": "#161d1a",
+                        "background": "#f3fbf6",
+                        "text-muted": "#6B7A70",
+                        "on-secondary-fixed-variant": "#234f3f",
+                        "inverse-surface": "#2a322f",
+                        "on-surface-variant": "#3f4941",
+                        "surface-dim": "#d4dcd7",
+                        "primary": "#006038",
+                        "secondary-container": "#bbead4",
+                        "surface-container": "#e8f0eb",
+                        "primary-fixed-dim": "#82d8a3",
+                        "surface-tint": "#066c41",
+                        "inverse-primary": "#82d8a3",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#161d1a",
+                        "on-secondary-fixed": "#002116",
+                        "surface-bright": "#f3fbf6",
+                        "on-tertiary-container": "#ddf3e5",
+                        "on-primary-fixed-variant": "#00522f",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#0d1f17",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f3fbf6",
+                        "inverse-on-surface": "#ebf3ee",
+                        "surface-container-highest": "#dce4e0",
+                        "secondary-fixed-dim": "#a2d1bb",
+                        "primary-container": "#1f7a4d",
+                        "secondary": "#3b6756",
+                        "success": "#2EAD66",
+                        "on-tertiary-fixed-variant": "#384b41",
+                        "background-mint": "#F3FBF6",
+                        "text-dark": "#10251B",
+                        "surface-container-low": "#edf5f1",
+                        "background-warm": "#F7F5EF",
+                        "tertiary": "#44584d",
+                        "surface-variant": "#dce4e0",
+                        "tertiary-container": "#5c7065",
+                        "surface-container-high": "#e2eae5",
+                        "outline": "#6f7a71",
+                        "on-secondary-container": "#406b5a",
+                        "secondary-fixed": "#beedd7",
+                        "tertiary-fixed": "#d2e8da",
+                        "on-primary-fixed": "#002110"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-space": "12px",
+                        "card-padding": "24px",
+                        "page-padding": "20px",
+                        "section-gap-md": "32px",
+                        "section-gap-sm": "16px",
+                        "inline-space": "8px",
+                        "section-gap-lg": "48px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "button-text": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "display-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "button-text": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .fill-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .bg-pattern {
+            background-image: radial-gradient(circle at 2px 2px, rgba(0, 96, 56, 0.05) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="bg-background dark:bg-on-background fixed top-0 w-full z-40 transition-shadow duration-300" id="top-nav">
+<div class="flex justify-between items-center px-page-padding h-16 w-full max-w-[768px] mx-auto">
+<div class="flex items-center gap-inline-space">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="account_balance">account_balance</span>
+<span class="font-display-lg-mobile text-display-lg-mobile md:text-display-lg md:font-display-lg font-extrabold text-primary dark:text-primary-fixed">SMA Invest</span>
+</div>
+<!-- Desktop Navigation cluster -->
+<nav class="hidden md:flex items-center gap-section-gap-sm">
+<a class="text-primary font-bold active:scale-95 transition-transform hover:bg-surface-container-low px-3 py-2 rounded-lg" href="#">Home</a>
+<a class="text-on-surface-variant active:scale-95 transition-transform hover:bg-surface-container-low px-3 py-2 rounded-lg" href="#">Modules</a>
+</nav>
+<div class="flex items-center gap-inline-space">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close up, vibrant portrait of a young high school student, confident and smiling. The lighting is soft and natural, emphasizing approachability and clarity. The background is a clean, neutral gradient to keep the focus entirely on the subject's expression of optimistic growth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGCRKoF9DD5Gtl5ZVP8-wAWVpZAazTLlYGukvPuSyjg6DPFuMNuPiUFTpd1Ldu09BXkOEDMjYl0bz_ciPm4rouUkDHwmN01OBQYWtLfGzcnzgwYPX3pr-wW0bvcORPTybMG59zxmxUyzEcnX8qQXcun-DTjLrT3m-12KPZpzevzEHSdrwuW6D3KBiMP0mHmX3FaG5sU1jFxn8p5qONZPwN5dtf-BYIeeYLJQBtA0lGLjfR9TbQdy2lJ0h9bLfobJgwO-R6A8kKY7l1"/>
+</div>
+</div>
+</div>
+</header>
+<main class="w-full max-w-[768px] mx-auto pt-20 px-page-padding min-h-screen flex flex-col gap-section-gap-md">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center mt-section-gap-sm bg-pattern rounded-2xl py-12 relative overflow-hidden">
+<!-- Decorative blobs -->
+<div class="absolute -top-10 -left-10 w-40 h-40 bg-secondary-container rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary-fixed-dim rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+<div class="z-10 flex flex-col items-center gap-stack-space px-4">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container rounded-full text-primary font-label-md text-label-md mb-2">
+<span class="material-symbols-outlined text-[16px] fill-icon" data-icon="school">school</span>
+                    Platform Literasi Finansial
+                </div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:text-display-lg md:font-display-lg text-text-dark max-w-lg">Belajar Investasi dari Sekolah</h1>
+<p class="font-body-lg text-body-lg text-text-muted max-w-md mt-2">Pelajari dasar investasi lewat modul singkat, quiz sederhana, dan progress belajar yang mudah dipantau.</p>
+<div class="flex flex-col sm:flex-row w-full sm:w-auto gap-4 mt-section-gap-sm">
+<button class="w-full sm:w-auto px-8 py-4 bg-primary text-on-primary font-button-text text-button-text rounded-full hover:bg-surface-tint active:scale-95 transition-all shadow-md">
+                        Mulai Belajar
+                    </button>
+<button class="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-primary text-primary font-button-text text-button-text rounded-full hover:bg-surface-container-low active:scale-95 transition-all">
+                        Lihat Demo
+                    </button>
+</div>
+</div>
+</section>
+<!-- Feature Cards (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-section-gap-lg">
+<!-- Modul Edukasi Singkat -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-3xl p-card-padding shadow-[0px_4px_20px_rgba(16,37,27,0.03)] flex flex-col gap-stack-space md:col-span-2">
+<div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined fill-icon text-[24px]" data-icon="menu_book">menu_book</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-text-dark">Modul Edukasi Singkat</h3>
+<p class="font-body-md text-body-md text-text-muted">Materi yang disusun khusus untuk pelajar, mudah dipahami tanpa bahasa teknis yang rumit.</p>
+<div class="mt-4 flex gap-3 overflow-x-auto pb-2 snap-x scrollbar-hide">
+<div class="flex-none w-64 bg-background-mint rounded-2xl p-4 snap-center border border-surface-container-low">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-1 bg-surface-container-lowest text-primary text-[10px] font-bold rounded-full">Baru</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="play_circle">play_circle</span>
+</div>
+<h4 class="font-title-lg text-title-lg text-text-dark line-clamp-2">Pengenalan Pasar Modal</h4>
+<div class="mt-4 flex items-center gap-2 text-text-muted font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> 5 Menit
+                        </div>
+</div>
+<div class="flex-none w-64 bg-background-mint rounded-2xl p-4 snap-center border border-surface-container-low">
+<div class="flex justify-between items-start mb-2">
+<span class="px-2 py-1 bg-surface-container-lowest text-primary text-[10px] font-bold rounded-full">Gratis</span>
+<span class="material-symbols-outlined text-primary text-[18px]" data-icon="play_circle">play_circle</span>
+</div>
+<h4 class="font-title-lg text-title-lg text-text-dark line-clamp-2">Apa itu Reksadana?</h4>
+<div class="mt-4 flex items-center gap-2 text-text-muted font-label-md text-label-md">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span> 8 Menit
+                        </div>
+</div>
+</div>
+</div>
+<!-- Quiz Pemahaman -->
+<div class="bg-[#DFF5E7] rounded-3xl p-card-padding flex flex-col gap-stack-space relative overflow-hidden">
+<div class="absolute -right-6 -bottom-6 opacity-20">
+<span class="material-symbols-outlined text-[120px] text-primary" data-icon="quiz">quiz</span>
+</div>
+<div class="w-12 h-12 rounded-xl bg-white/50 flex items-center justify-center text-primary z-10">
+<span class="material-symbols-outlined fill-icon text-[24px]" data-icon="psychology">psychology</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-text-dark z-10">Quiz Pemahaman</h3>
+<p class="font-body-md text-body-md text-primary/80 z-10">Uji pengetahuanmu dengan kuis interaktif setelah menyelesaikan modul.</p>
+<div class="mt-auto pt-6 z-10">
+<div class="bg-white/80 backdrop-blur-sm rounded-xl p-3 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center text-warning">
+<span class="material-symbols-outlined text-[16px] fill-icon" data-icon="star">star</span>
+</div>
+<span class="font-title-lg text-title-lg text-text-dark text-sm">+50 XP</span>
+</div>
+<button class="text-primary font-label-md text-label-md flex items-center hover:underline">Mulai Quiz <span class="material-symbols-outlined text-[16px] ml-1" data-icon="arrow_forward">arrow_forward</span></button>
+</div>
+</div>
+</div>
+<!-- Progress Belajar -->
+<div class="bg-surface-container-lowest border border-surface-container-highest rounded-3xl p-card-padding shadow-[0px_4px_20px_rgba(16,37,27,0.03)] flex flex-col gap-stack-space">
+<div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined fill-icon text-[24px]" data-icon="trending_up">trending_up</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-text-dark">Progress Belajar</h3>
+<p class="font-body-md text-body-md text-text-muted">Pantau perkembangan belajarmu hari demi hari.</p>
+<div class="mt-auto pt-6">
+<div class="flex justify-between items-end mb-2">
+<span class="font-title-lg text-title-lg text-text-dark">Level 1: Pemula</span>
+<span class="font-label-md text-label-md text-primary">30%</span>
+</div>
+<div class="w-full bg-surface-container-high rounded-full h-3 overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: 30%;"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden bg-surface dark:bg-inverse-surface fixed bottom-0 w-full rounded-t-xl shadow-[0px_-4px_20px_rgba(16,37,27,0.05)] shadow-lg fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe">
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined fill-icon" data-icon="home">home</span>
+<span class="font-label-md text-label-md mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:opacity-80 active:scale-90 transition-transform px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="font-label-md text-label-md mt-1">Modules</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:opacity-80 active:scale-90 transition-transform px-4 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-md text-label-md mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple scroll effect for top nav
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('top-nav');
+            if (window.scrollY > 10) {
+                nav.classList.add('shadow-md');
+            } else {
+                nav.classList.remove('shadow-md');
+            }
+        });
+    </script>
+</body></html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html lang="id"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard - SMA Invest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "warning": "#F5C542",
+                        "primary-fixed": "#9ef5be",
+                        "white": "#FFFFFF",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#b6ccbe",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#aeffca",
+                        "outline-variant": "#bec9bf",
+                        "on-background": "#161d1a",
+                        "background": "#f3fbf6",
+                        "text-muted": "#6B7A70",
+                        "on-secondary-fixed-variant": "#234f3f",
+                        "inverse-surface": "#2a322f",
+                        "on-surface-variant": "#3f4941",
+                        "surface-dim": "#d4dcd7",
+                        "primary": "#006038",
+                        "secondary-container": "#bbead4",
+                        "surface-container": "#e8f0eb",
+                        "primary-fixed-dim": "#82d8a3",
+                        "surface-tint": "#066c41",
+                        "inverse-primary": "#82d8a3",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#161d1a",
+                        "on-secondary-fixed": "#002116",
+                        "surface-bright": "#f3fbf6",
+                        "on-tertiary-container": "#ddf3e5",
+                        "on-primary-fixed-variant": "#00522f",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#0d1f17",
+                        "on-error": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f3fbf6",
+                        "inverse-on-surface": "#ebf3ee",
+                        "surface-container-highest": "#dce4e0",
+                        "secondary-fixed-dim": "#a2d1bb",
+                        "primary-container": "#1f7a4d",
+                        "secondary": "#3b6756",
+                        "success": "#2EAD66",
+                        "on-tertiary-fixed-variant": "#384b41",
+                        "background-mint": "#F3FBF6",
+                        "text-dark": "#10251B",
+                        "surface-container-low": "#edf5f1",
+                        "background-warm": "#F7F5EF",
+                        "tertiary": "#44584d",
+                        "surface-variant": "#dce4e0",
+                        "tertiary-container": "#5c7065",
+                        "surface-container-high": "#e2eae5",
+                        "outline": "#6f7a71",
+                        "on-secondary-container": "#406b5a",
+                        "secondary-fixed": "#beedd7",
+                        "tertiary-fixed": "#d2e8da",
+                        "on-primary-fixed": "#002110"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "2xl": "1.5rem"
+                    },
+                    "spacing": {
+                        "stack-space": "12px",
+                        "card-padding": "24px",
+                        "page-padding": "20px",
+                        "section-gap-md": "32px",
+                        "section-gap-sm": "16px",
+                        "inline-space": "8px",
+                        "section-gap-lg": "48px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Plus Jakarta Sans"],
+                        "button-text": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "title-lg": ["Plus Jakarta Sans"],
+                        "display-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "button-text": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "title-lg": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md font-sans min-h-screen flex flex-col md:items-center">
+<!-- TopAppBar (Visible on Desktop, hidden on mobile for BottomNav layout) -->
+<header class="hidden md:flex justify-between items-center px-page-padding h-16 w-full max-w-[768px] mx-auto bg-background dark:bg-on-background fixed top-0 z-50">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+<span class="font-display-lg-mobile text-display-lg-mobile font-extrabold text-primary dark:text-primary-fixed">SMA Invest</span>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-primary font-bold active:scale-95 transition-transform" href="#">Home</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Modules</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" href="#">Profile</a>
+</nav>
+<div>
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-on-surface-variant">person</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-[768px] mx-auto px-page-padding pt-6 pb-24 md:pt-24 flex flex-col gap-section-gap-md">
+<!-- Welcome Section -->
+<section class="flex flex-col gap-inline-space">
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-primary">Hi, Kiya! 👋</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Siap untuk belajar investasi hari ini?</p>
+</section>
+<!-- Progress Overview Card -->
+<section>
+<div class="bg-primary-container rounded-2xl p-card-padding flex flex-col gap-stack-space relative overflow-hidden shadow-lg">
+<!-- Decorative background elements -->
+<div class="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-secondary-container opacity-20 rounded-full blur-2xl"></div>
+<div class="absolute bottom-0 left-0 -mb-8 -ml-8 w-24 h-24 bg-surface-container opacity-20 rounded-full blur-xl"></div>
+<div class="flex items-center gap-3 relative z-10">
+<div class="w-12 h-12 bg-on-primary-container rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-primary-container">Progress Belajar</h2>
+<p class="font-body-md text-body-md text-primary-fixed-dim">Level Pemula</p>
+</div>
+</div>
+<div class="mt-4 relative z-10">
+<div class="flex justify-between items-end mb-2">
+<span class="font-title-lg text-title-lg text-on-primary-container">2 dari 5</span>
+<span class="font-label-md text-label-md text-primary-fixed-dim uppercase tracking-wider">Modul Selesai</span>
+</div>
+<!-- Progress Bar -->
+<div class="h-3 bg-surface-container-highest/30 rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed rounded-full w-[40%] shadow-[0_0_10px_rgba(158,245,190,0.5)]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Module List Section -->
+<section class="flex flex-col gap-stack-space">
+<div class="flex justify-between items-center mb-2">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Pilih Modul</h3>
+<button class="font-label-md text-label-md text-primary uppercase tracking-wider hover:opacity-80 transition-opacity">Lihat Semua</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-space">
+<!-- Module Card 1 (Completed) -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/30 flex items-start gap-4 shadow-[0px_4px_20px_rgba(16,37,27,0.05)] opacity-80 relative overflow-hidden">
+<div class="absolute top-2 right-2 flex items-center justify-center w-6 h-6 bg-success rounded-full">
+<span class="material-symbols-outlined text-white text-[16px] font-bold">check</span>
+</div>
+<div class="w-16 h-16 rounded-xl bg-surface-container flex-shrink-0 flex items-center justify-center" data-alt="Illustration of a small coin plant growing in a pot, simple vector style, green and white colors, bright soft lighting, ed-tech modern ui aesthetic">
+<span class="material-symbols-outlined text-tertiary text-3xl" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="flex flex-col flex-1 h-full justify-between">
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface line-clamp-1">Apa Itu Investasi?</h4>
+<p class="font-body-md text-body-md text-text-muted mt-1 line-clamp-2">Pahami dasar-dasar investasi dan mengapa ini penting untuk masa depan.</p>
+</div>
+<div class="mt-3 flex justify-between items-center">
+<span class="inline-block bg-surface-container-highest text-on-surface-variant font-label-md text-label-md px-2 py-1 rounded-full">10 Min</span>
+<span class="font-label-md text-label-md text-success uppercase">Selesai</span>
+</div>
+</div>
+</div>
+<!-- Module Card 2 (In Progress) -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 border-2 border-primary flex items-start gap-4 shadow-[0px_4px_20px_rgba(16,37,27,0.08)] relative overflow-hidden">
+<div class="w-16 h-16 rounded-xl bg-secondary-container flex-shrink-0 flex items-center justify-center overflow-hidden" data-alt="Illustration of a piggy bank facing off against a rising stock chart arrow, split composition, soft green background, modern minimalist 3d style">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">compare_arrows</span>
+</div>
+<div class="flex flex-col flex-1 h-full justify-between">
+<div>
+<h4 class="font-title-lg text-title-lg text-on-surface line-clamp-1">Menabung vs Investasi</h4>
+<p class="font-body-md text-body-md text-text-muted mt-1 line-clamp-2">Kenali perbedaan utama dan kapan harus menggunakan masing-masing.</p>
+</div>
+<div class="mt-3 flex justify-between items-center">
+<span class="inline-block bg-secondary-container/50 text-on-secondary-container font-label-md text-label-md px-2 py-1 rounded-full">15 Min</span>
+<button class="bg-primary text-white font-button-text text-button-text px-4 py-1.5 rounded-full hover:opacity-90 active:scale-95 transition-all text-sm">Lanjut</button>
+</div>
+</div>
+</div>
+<!-- Module Card 3 (Locked/New) -->
+<div class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/30 flex items-start gap-4 shadow-[0px_4px_20px_rgba(16,37,27,0.05)] relative overflow-hidden">
+<div class="w-16 h-16 rounded-xl bg-surface-variant flex-shrink-0 flex items-center justify-center overflow-hidden" data-alt="Illustration of a shield with a lightning bolt next to a bar chart, representing risk and return, flat modern colors, muted soft green tones">
+<span class="material-symbols-outlined text-outline text-3xl" style="font-variation-settings: 'FILL' 1;">balance</span>
+</div>
+<div class="flex flex-col flex-1 h-full justify-between">
+<div>
+<div class="flex items-center gap-2">
+<h4 class="font-title-lg text-title-lg text-on-surface line-clamp-1">Risiko dan Return</h4>
+<span class="bg-warning/20 text-on-surface-variant font-label-md text-[10px] px-1.5 py-0.5 rounded-full uppercase">Baru</span>
+</div>
+<p class="font-body-md text-body-md text-text-muted mt-1 line-clamp-2">Pelajari hubungan antara risiko yang diambil dengan potensi keuntungan.</p>
+</div>
+<div class="mt-3 flex justify-between items-center">
+<span class="inline-block bg-surface-container text-on-surface-variant font-label-md text-label-md px-2 py-1 rounded-full">20 Min</span>
+<button class="bg-surface-container text-on-surface font-button-text text-button-text px-4 py-1.5 rounded-full hover:bg-surface-container-high active:scale-95 transition-all text-sm">Mulai</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Tip Card (Key Takeaway Style) -->
+<section class="mt-4">
+<div class="bg-[#DFF5E7] rounded-xl p-4 flex items-start gap-3 border border-[#c6ecd5]">
+<span class="material-symbols-outlined text-primary mt-0.5">lightbulb</span>
+<div>
+<h5 class="font-title-lg text-title-lg text-primary mb-1">Tip Hari Ini</h5>
+<p class="font-body-md text-body-md text-on-surface-variant">Mulai investasi dari nominal kecil tapi rutin lebih baik daripada modal besar tapi jarang.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-inverse-surface px-2 py-3 pb-safe shadow-[0px_-4px_20px_rgba(16,37,27,0.05)] rounded-t-xl">
+<button class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-md text-[10px] mt-1 font-semibold">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:opacity-80 active:scale-90 transition-transform px-4 py-1">
+<span class="material-symbols-outlined text-[24px]">menu_book</span>
+<span class="font-label-md text-[10px] mt-1">Modules</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:opacity-80 active:scale-90 transition-transform px-4 py-1">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="font-label-md text-[10px] mt-1">Profile</span>
+</button>
+</nav>
+</body></html>

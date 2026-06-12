@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { supabase } from '../supabase/client'
+
 import LandingPage from '../pages/LandingPage.vue'
-import Dashboard from '../pages/Dashboard.vue'
 import LoginPage from '../pages/LoginPage.vue'
-import ClosetPage from '../pages/ClosetPage.vue'
+import Dashboard from '../pages/Dashboard.vue'
+import ModulePage from '../pages/ModulePage.vue'
 
 const routes = [
   {
@@ -24,9 +25,9 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/closet',
-    name: 'Closet',
-    component: ClosetPage,
+    path: '/modules',
+    name: 'Modules',
+    component: ModulePage,
     meta: { requiresAuth: true }
   }
 ]
@@ -36,35 +37,15 @@ const router = createRouter({
   routes
 })
 
-// Helper to wait for Firebase auth state on first load
-const getCurrentUser = () => {
-  return new Promise((resolve, reject) => {
-    const removeListener = onAuthStateChanged(
-      getAuth(),
-      (user) => {
-        removeListener()
-        resolve(user)
-      },
-      reject
-    )
-  })
-}
-
 router.beforeEach(async (to, from, next) => {
-  const currentUser = await getCurrentUser()
+  const {
+    data: { session }
+  } = await supabase.auth.getSession()
 
-  if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (currentUser) {
-      next()
-    } else {
-      next('/login')
-    }
-  } else if (to.matched.some(record => record.meta.requiresGuest)) {
-    if (currentUser) {
-      next('/dashboard')
-    } else {
-      next()
-    }
+  if (to.meta.requiresAuth && !session) {
+    next('/login')
+  } else if (to.meta.requiresGuest && session) {
+    next('/dashboard')
   } else {
     next()
   }
