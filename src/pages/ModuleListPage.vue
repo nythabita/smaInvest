@@ -148,10 +148,10 @@ const getIconTextClass = (status) => {
 
 const getStatusText = (status) => {
   switch (status) {
-    case 'completed': return 'Selesai'
-    case 'in_progress': return 'Belajar'
-    case 'not_started': return 'Mulai'
-    default: return ''
+    case 'completed': return 'Completed'
+    case 'in_progress': return 'In Progress'
+    case 'not_started': return 'Not Started'
+    default: return 'Not Started'
   }
 }
 

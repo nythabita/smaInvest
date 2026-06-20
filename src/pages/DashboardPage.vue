@@ -21,7 +21,7 @@
     <main class="flex-1 w-full max-w-[768px] mx-auto px-page-padding pt-6 pb-24 md:pt-24 flex flex-col gap-section-gap-md">
       <!-- Welcome Section -->
       <section class="flex flex-col gap-inline-space">
-        <h1 class="font-display-lg-mobile text-display-lg-mobile text-primary">Hi, Kiya! 👋</h1>
+        <h1 class="font-display-lg-mobile text-display-lg-mobile text-primary">Hi, {{ user?.email ? user.email.split('@')[0] : 'Kiya' }}! 👋</h1>
         <p class="font-body-lg text-body-lg text-on-surface-variant">Siap untuk belajar investasi hari ini?</p>
       </section>
 
@@ -141,7 +141,7 @@ import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
 const { modules: allModules, fetchModules } = useModules()
-const { logout } = useAuth()
+const { user, logout } = useAuth()
 
 onMounted(() => {
   fetchModules()

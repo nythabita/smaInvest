@@ -183,10 +183,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { useModules } from '../composables/useModules'
 import { useQuiz } from '../composables/useQuiz'
 import { useAuth } from '../composables/useAuth'
+import { supabase } from '../supabase/client'
 
 const route = useRoute()
 const router = useRouter()
-const { logout } = useAuth()
+const { user, logout } = useAuth()
 
 const handleLogout = async () => {
   await logout()
@@ -237,7 +238,48 @@ const nextQuestion = () => {
   }
 }
 
-const calculateScore = () => {
+const saveQuizAttempt = async (correctCount) => {
+  if (!user.value || !currentModule.value) return
+  
+  try {
+    const { error: attemptErr } = await supabase
+      .from('quiz_attempts')
+      .insert({
+        user_id: user.value.id,
+        module_id: currentModule.value.id,
+        score: score.value,
+        total_questions: questions.value.length,
+        correct_answers: correctCount
+      })
+      
+    if (attemptErr) throw attemptErr
+  } catch (err) {
+    console.error('Error saving quiz attempt:', err.message)
+  }
+}
+
+const updateUserProgress = async () => {
+  if (!user.value || !currentModule.value) return
+  
+  try {
+    const { error: progressErr } = await supabase
+      .from('user_progress')
+      .upsert({
+        user_id: user.value.id,
+        module_id: currentModule.value.id,
+        is_completed: true,
+        completed_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,module_id'
+      })
+      
+    if (progressErr) throw progressErr
+  } catch (err) {
+    console.error('Error updating user progress:', err.message)
+  }
+}
+
+const calculateScore = async () => {
   let correctCount = 0
   userAnswers.value.forEach((answerIndex, qIndex) => {
     if (questions.value[qIndex] && questions.value[qIndex].options[answerIndex] && questions.value[qIndex].options[answerIndex].isCorrect) {
@@ -245,6 +287,10 @@ const calculateScore = () => {
     }
   })
   score.value = Math.round((correctCount / questions.value.length) * 100)
+
+  // Save attempt and update progress asynchronously
+  await saveQuizAttempt(correctCount)
+  await updateUserProgress()
 }
 
 const goBack = () => {
