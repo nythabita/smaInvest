@@ -11,7 +11,7 @@
         <button class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" @click="navigateTo('/modules')">Modules</button>
       </nav>
       <div>
-        <button class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden hover:opacity-85 active:scale-95 transition-all" @click="navigateTo('/login')" title="Log Out">
+        <button class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden hover:opacity-85 active:scale-95 transition-all" @click="handleLogout" title="Log Out">
           <span class="material-symbols-outlined text-on-surface-variant">logout</span>
         </button>
       </div>
@@ -134,21 +134,32 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { modulesData } from '../data/modules'
+import { useModules } from '../composables/useModules'
+import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
+const { modules: allModules, fetchModules } = useModules()
+const { logout } = useAuth()
 
-// Show first 3 modules as preview on Dashboard
-const modules = ref(modulesData.slice(0, 3))
+onMounted(() => {
+  fetchModules()
+})
 
-const completedCount = computed(() => modulesData.filter(m => m.status === 'completed').length)
-const totalCount = computed(() => modulesData.length)
+const modules = computed(() => (allModules.value || []).slice(0, 3))
+
+const completedCount = computed(() => allModules.value.filter(m => (m.status || 'not_started') === 'completed').length)
+const totalCount = computed(() => allModules.value.length)
 const completedProgress = computed(() => {
   if (totalCount.value === 0) return 0
-  return Math.round(modulesData.reduce((sum, m) => sum + m.progress, 0) / totalCount.value)
+  return Math.round(allModules.value.reduce((sum, m) => sum + (m.progress || 0), 0) / totalCount.value)
 })
+
+const handleLogout = async () => {
+  await logout()
+  router.push('/login')
+}
 
 const getCardClass = (status) => {
   if (status === 'in_progress') {

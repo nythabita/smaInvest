@@ -11,7 +11,7 @@
         <button class="text-primary font-bold active:scale-95 transition-transform" @click="navigateTo('/modules')">Modules</button>
       </nav>
       <div>
-        <button class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden hover:opacity-85 active:scale-95 transition-all" @click="navigateTo('/login')" title="Log Out">
+        <button class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden hover:opacity-85 active:scale-95 transition-all" @click="handleLogout" title="Log Out">
           <span class="material-symbols-outlined text-on-surface-variant">logout</span>
         </button>
       </div>
@@ -111,9 +111,16 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useModules } from '../composables/useModules'
+import { useAuth } from '../composables/useAuth'
 
 const router = useRouter()
 const { modules, loading, error, fetchModules } = useModules()
+const { logout } = useAuth()
+
+const handleLogout = async () => {
+  await logout()
+  router.push('/login')
+}
 
 onMounted(() => {
   fetchModules()
