@@ -38,10 +38,7 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
-/* Glowing red shadow for active items */
-.clothing-item-glow {
-  box-shadow: 0 0 20px rgba(182, 23, 41, 0.15);
-}
+
 
 /* Base editorial card */
 .editorial-card {

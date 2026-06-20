@@ -1,218 +1,201 @@
+<template>
+  <div class="min-h-screen bg-neutral-50 pb-20 pb-safe">
+    <!-- List View -->
+    <div v-if="!moduleId">
+      <!-- Header -->
+      <header class="bg-white px-6 py-8 rounded-b-[2rem] shadow-sm mb-6">
+        <div class="flex items-center gap-3 mb-4 text-emerald-700">
+          <BookOpen class="w-6 h-6" />
+          <h1 class="font-bold text-xl tracking-tight">Modul Belajar</h1>
+        </div>
+        <p class="text-gray-500 text-sm font-medium">Pilih materi investasi dasar yang ingin kamu pelajari.</p>
+      </header>
+
+      <main class="px-6 space-y-4">
+        <div 
+          v-for="module in modules" 
+          :key="module.id"
+          class="bg-white rounded-2xl p-5 shadow-sm border border-neutral-100 flex flex-col"
+        >
+          <div class="flex justify-between items-start mb-2">
+            <span 
+              class="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md"
+              :class="{
+                'bg-emerald-100 text-emerald-700': module.status === 'completed',
+                'bg-amber-100 text-amber-700': module.status === 'in_progress',
+                'bg-gray-100 text-gray-600': module.status === 'not_started'
+              }"
+            >
+              {{ getStatusLabel(module.status) }}
+            </span>
+            <div class="flex items-center text-gray-400 text-xs font-medium">
+              <Clock class="w-3.5 h-3.5 mr-1" />
+              {{ module.estimatedTime }}
+            </div>
+          </div>
+          
+          <h3 class="font-bold text-gray-900 text-lg mb-1">{{ module.title }}</h3>
+          <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ module.description }}</p>
+          
+          <button 
+            @click="openModule(module.id)"
+            class="mt-auto w-full py-2.5 rounded-xl text-sm font-bold transition-all bg-emerald-50 text-emerald-700 hover:bg-emerald-100 flex items-center justify-center gap-2"
+          >
+            Buka Modul
+            <ChevronRight class="w-4 h-4" />
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <!-- Detail View -->
+    <div v-else-if="currentModule">
+      <!-- Header -->
+      <header class="bg-emerald-700 text-white px-6 pt-10 pb-6 rounded-b-[2rem] shadow-md sticky top-0 z-10">
+        <button @click="goBack" class="flex items-center text-emerald-100 hover:text-white transition-colors mb-4 text-sm font-medium">
+          <ArrowLeft class="w-4 h-4 mr-1" />
+          Kembali
+        </button>
+        <div class="flex items-center text-emerald-200 text-xs font-medium mb-2">
+          <Clock class="w-3.5 h-3.5 mr-1" />
+          {{ currentModule.estimatedTime }}
+        </div>
+        <h1 class="text-2xl font-bold mb-2">{{ currentModule.title }}</h1>
+        <p class="text-emerald-50 text-sm opacity-90">{{ currentModule.description }}</p>
+      </header>
+
+      <main class="px-6 py-6 space-y-6">
+        <!-- Content -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-neutral-100">
+          <ul class="space-y-4 text-gray-700 text-sm leading-relaxed list-disc list-outside ml-4">
+            <li v-for="(point, index) in currentModule.content" :key="index" class="pl-1">
+              {{ point }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Key Takeaway -->
+        <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 relative overflow-hidden">
+          <div class="absolute -right-4 -top-4 text-emerald-100/50">
+            <Lightbulb class="w-20 h-20" />
+          </div>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-emerald-700 font-bold mb-2">
+              <Lightbulb class="w-5 h-5" />
+              <span>Key Takeaway</span>
+            </div>
+            <p class="text-emerald-800 text-sm font-medium leading-relaxed italic">
+              "{{ currentModule.keyTakeaway }}"
+            </p>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <button 
+          @click="startQuiz"
+          class="w-full py-4 rounded-xl text-base font-bold transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-200 hover:bg-emerald-700 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2"
+        >
+          Mulai Quiz
+          <CheckCircle2 class="w-5 h-5" />
+        </button>
+      </main>
+    </div>
+
+    <!-- Not Found -->
+    <div v-else class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+      <AlertCircle class="w-12 h-12 text-gray-300 mb-4" />
+      <h2 class="text-xl font-bold text-gray-800 mb-2">Modul Tidak Ditemukan</h2>
+      <p class="text-gray-500 mb-6 text-sm">Modul yang kamu cari mungkin sudah dihapus atau tidak tersedia.</p>
+      <button @click="goBack" class="px-6 py-2 bg-emerald-100 text-emerald-700 rounded-full font-semibold text-sm hover:bg-emerald-200">
+        Kembali ke Daftar
+      </button>
+    </div>
+  </div>
+</template>
+
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ArrowLeft, Loader2, Trash2, CalendarDays } from 'lucide-vue-next'
-import { 
-  closetItems, 
-  state, 
-  updateSliderStatus, 
-  isLoadingCloset, 
-  initClosetAuthListener, 
-  deleteItem, 
-  deleteOutfit,
-  savedOutfits, 
-  isLoadingOutfits 
-} from '../store/closet.js'
+import { computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { BookOpen, Clock, ChevronRight, ArrowLeft, Lightbulb, CheckCircle2, AlertCircle } from 'lucide-vue-next'
 
-onMounted(() => {
-  initClosetAuthListener()
-})
-
+const route = useRoute()
 const router = useRouter()
 
-const categories = ['headwear', 'tops', 'bottoms']
-const activeTab = ref('closet') // 'closet' | 'outfits'
+const moduleId = computed(() => route.params.id)
 
-const hasItems = computed(() => closetItems.value.length > 0)
-const hasOutfits = computed(() => savedOutfits.value.length > 0)
+const modules = [
+  {
+    id: 1,
+    title: 'Apa Itu Investasi?',
+    description: 'Kenali konsep dasar investasi untuk pemula.',
+    estimatedTime: '5 min read',
+    status: 'completed',
+    content: [
+      'Investasi adalah kegiatan menempatkan uang pada aset tertentu dengan harapan nilainya bertumbuh di masa depan.',
+      'Berbeda dari menabung, investasi memiliki potensi keuntungan dan risiko.',
+      'Untuk pemula, yang penting bukan langsung mencari keuntungan besar, tetapi memahami konsep dasar dan risiko.'
+    ],
+    keyTakeaway: 'Investasi adalah cara mengembangkan uang, tetapi harus dipahami dengan bijak.'
+  },
+  {
+    id: 2,
+    title: 'Menabung vs Investasi',
+    description: 'Pahami perbedaan menyimpan uang dan mengembangkan uang.',
+    estimatedTime: '4 min read',
+    status: 'in_progress',
+    content: [
+      'Menabung biasanya bertujuan menyimpan uang agar aman dan mudah digunakan.',
+      'Investasi bertujuan mengembangkan nilai uang dalam jangka waktu tertentu.',
+      'Keduanya penting, tetapi digunakan untuk tujuan yang berbeda.'
+    ],
+    keyTakeaway: 'Menabung cocok untuk kebutuhan dekat, investasi cocok untuk tujuan jangka panjang.'
+  },
+  {
+    id: 3,
+    title: 'Risiko dan Return',
+    description: 'Pelajari hubungan antara potensi keuntungan dan risiko.',
+    estimatedTime: '5 min read',
+    status: 'not_started',
+    content: [
+      'Return adalah potensi keuntungan dari investasi.',
+      'Risiko adalah kemungkinan hasil investasi tidak sesuai harapan.',
+      'Semakin tinggi potensi return, biasanya semakin tinggi juga risikonya.'
+    ],
+    keyTakeaway: 'Sebelum investasi, pahami dulu risiko dan jangan hanya melihat keuntungan.'
+  }
+]
 
-const isInSlider = (item) => {
-  return item.inSlider === true
+const currentModule = computed(() => {
+  if (!moduleId.value) return null
+  return modules.find(m => m.id === parseInt(moduleId.value, 10)) || null
+})
+
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'completed': return 'Selesai'
+    case 'in_progress': return 'Sedang Belajar'
+    case 'not_started': return 'Belum Mulai'
+    default: return ''
+  }
 }
 
-const toggleSlider = async (item) => {
-  item.inSlider = !item.inSlider
-  if (item.inSlider) {
-    const layer = state.find(l => l.key === item.category)
-    if (layer) {
-      layer.activeIndex = layer.items.length - (layer.items.includes(item) ? 1 : 0)
-    }
-  }
-
-  if (item.firestoreId) {
-    try {
-      await updateSliderStatus(item.firestoreId, item.inSlider)
-    } catch (err) {
-      console.error('Failed to update slider status:', err)
-      item.inSlider = !item.inSlider
-    }
-  }
+const openModule = (id) => {
+  router.push(`/modules/${id}`)
 }
 
-const handleDeleteItem = async (item) => {
-  if (confirm("Are you sure you want to delete this?")) {
-    try {
-      await deleteItem(item)
-    } catch (err) {
-      console.error('Failed to delete item:', err)
-      alert('Failed to delete item. Please try again.')
-    }
-  }
+const goBack = () => {
+  router.push('/modules')
 }
 
-const handleDeleteOutfit = async (outfit) => {
-  if (confirm("Are you sure you want to delete this?")) {
-    try {
-      await deleteOutfit(outfit)
-    } catch (err) {
-      console.error('Failed to delete outfit:', err)
-      alert('Failed to delete outfit. Please try again.')
-    }
+const startQuiz = () => {
+  if (moduleId.value) {
+    router.push(`/quiz/${moduleId.value}`)
   }
-}
-
-const formatDate = (dateValue) => {
-  if (!dateValue) return ''
-  const d = dateValue.toDate ? dateValue.toDate() : new Date(dateValue)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 </script>
 
-<template>
-  <div class="min-h-screen bg-surface text-on-surface font-body-md">
-    <!-- Header -->
-    <header class="sticky top-0 z-30 backdrop-blur-md bg-surface/80 border-b border-outline-variant/30">
-      <div class="mx-auto max-w-7xl px-5 sm:px-8 py-4 flex items-center justify-between">
-        <button @click="router.push('/dashboard')" class="press flex items-center gap-2 text-primary hover:opacity-80 transition font-medium">
-          <ArrowLeft :size="18" />
-          Back to Dashboard
-        </button>
-      </div>
-    </header>
-
-    <main class="pt-8 pb-24">
-      <div class="mx-auto max-w-5xl px-5 sm:px-8">
-        <div class="mb-8 text-center sm:text-left">
-          <p class="font-label-caps tracking-[0.18em] text-secondary">YOUR COLLECTION</p>
-          <h1 class="mt-2 font-headline-md text-3xl sm:text-4xl tracking-tight text-primary">Wardrobe</h1>
-          <p class="mt-3 text-on-surface-variant max-w-2xl">Manage your clothing items and view your saved outfit combinations.</p>
-        </div>
-
-        <!-- Tabs -->
-        <div class="flex gap-2 mb-10 p-1 bg-surface-container rounded-full max-w-sm mx-auto sm:mx-0">
-          <button
-            @click="activeTab = 'closet'"
-            :class="[
-              'flex-1 px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-300',
-              activeTab === 'closet'
-                ? 'bg-surface-container-lowest text-primary shadow-sm'
-                : 'text-on-surface-variant hover:text-primary'
-            ]"
-          >
-            Closet
-          </button>
-          <button
-            @click="activeTab = 'outfits'"
-            :class="[
-              'flex-1 px-4 py-2.5 rounded-full text-sm font-semibold transition-all duration-300',
-              activeTab === 'outfits'
-                ? 'bg-surface-container-lowest text-primary shadow-sm'
-                : 'text-on-surface-variant hover:text-primary'
-            ]"
-          >
-            Saved Outfits
-          </button>
-        </div>
-
-        <!-- ───────────────────────── CLOSET TAB ───────────────────────── -->
-        <div v-if="activeTab === 'closet'">
-
-        <div v-if="isLoadingCloset" class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-4">
-          <Loader2 class="animate-spin w-8 h-8 text-primary" />
-          <p class="text-sm font-medium">Loading closet...</p>
-        </div>
-
-        <div v-else-if="!hasItems" class="text-center py-16 rounded-3xl border border-dashed border-outline-variant/30 bg-surface-container">
-          <p class="text-on-surface-variant">Your closet is empty. Go back to the dashboard to add items!</p>
-        </div>
-
-        <div v-else class="space-y-12">
-          <!-- Group by category -->
-          <div v-for="cat in categories" :key="cat" v-show="closetItems.some(i => i.category === cat)">
-            <h3 class="font-headline-md text-xl mb-4 capitalize flex items-center gap-2 text-primary">
-              <span class="w-2 h-2 rounded-full bg-secondary"></span> {{ cat }}
-            </h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-              <div v-for="item in closetItems.filter(i => i.category === cat)" :key="item.id" class="relative aspect-[3/4] bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/30 p-3 flex flex-col items-center hover:shadow-md transition-shadow group">
-                 
-                 <!-- Delete Button -->
-                 <button 
-                   v-if="!item.isDefault"
-                   @click="handleDeleteItem(item)"
-                   class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-container/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-secondary/10 transition-colors z-10"
-                   title="Delete item"
-                 >
-                   <Trash2 :size="14" />
-                 </button>
-
-                 <div class="w-full h-full relative mb-2 rounded-xl overflow-hidden bg-surface-container flex items-center justify-center">
-                   <img :src="item.image" class="w-[85%] h-[85%] object-cover rounded-xl" />
-                 </div>
-                 <p class="text-xs font-medium text-primary truncate w-full text-center mt-auto">{{ item.label }}</p>
-                 <div class="mt-2 w-full">
-                   <button v-if="isInSlider(item)" @click="toggleSlider(item)" class="text-[10px] uppercase tracking-wider text-secondary text-center font-bold bg-secondary/10 hover:bg-secondary/20 py-1.5 rounded-lg w-full transition">
-                     ✓ In Slider
-                   </button>
-                   <button v-else @click="toggleSlider(item)" class="text-[10px] uppercase tracking-wider text-on-primary text-center font-bold bg-primary hover:bg-primary/90 py-1.5 rounded-lg w-full transition">
-                     + Add to Slider
-                   </button>
-                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        </div>
-
-        <!-- ───────────────────────── SAVED OUTFITS TAB ───────────────────────── -->
-        <div v-else-if="activeTab === 'outfits'">
-          <div v-if="isLoadingOutfits" class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-4">
-            <Loader2 class="animate-spin w-8 h-8 text-primary" />
-            <p class="text-sm font-medium">Loading outfits...</p>
-          </div>
-
-          <div v-else-if="!hasOutfits" class="text-center py-16 rounded-3xl border border-dashed border-outline-variant/30 bg-surface-container">
-            <p class="text-on-surface-variant">You haven't saved any outfits yet. Mix and match in the Dashboard to save your favorite looks!</p>
-          </div>
-
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div v-for="outfit in savedOutfits" :key="outfit.id" class="editorial-card p-5 group hover:border-primary/30 transition-colors">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="font-headline-md text-xl text-primary truncate pr-4">{{ outfit.name }}</h3>
-                <div class="flex items-center gap-3 shrink-0">
-                  <div class="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-on-surface-variant">
-                    <CalendarDays :size="12" />
-                    <span>{{ formatDate(outfit.createdAt) }}</span>
-                  </div>
-                  <button 
-                    @click="handleDeleteOutfit(outfit)"
-                    class="text-on-surface-variant hover:text-secondary transition-colors"
-                    title="Delete outfit"
-                  >
-                    <Trash2 :size="14" />
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Outfit Items Preview -->
-              <div class="grid grid-cols-3 gap-2 bg-surface-container rounded-2xl p-3 border border-outline-variant/30">
-                <div v-for="(item, idx) in outfit.items" :key="idx" class="aspect-[3/4] rounded-xl overflow-hidden bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center p-1">
-                  <img v-if="item.image" :src="item.image" class="w-full h-full object-contain" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-</template>
+<style scoped>
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+</style>
