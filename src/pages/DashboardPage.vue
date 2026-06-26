@@ -40,7 +40,7 @@
       <section class="flex flex-col gap-stack-space">
         <div class="flex justify-between items-center mb-2">
           <h3 class="font-headline-sm text-headline-sm text-on-surface">Pilih Modul</h3>
-          <button class="font-label-md text-label-md text-primary uppercase tracking-wider hover:opacity-80 transition-opacity">Lihat Semua</button>
+          <button @click="navigateTo('/modules')" class="font-label-md text-label-md text-primary uppercase tracking-wider hover:opacity-80 transition-opacity">Lihat Semua</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-stack-space">
           <div 
