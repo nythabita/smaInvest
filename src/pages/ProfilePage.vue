@@ -59,33 +59,88 @@
 
       <!-- Menu List -->
       <section class="flex flex-col gap-2 bg-white rounded-4xl p-2 border border-surface-variant shadow-[0px_4px_20px_rgba(16,37,27,0.05)]">
-        <button class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-surface-container-low transition-colors text-left group">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <span class="material-symbols-outlined">person</span>
+        <!-- Sunting Profil -->
+        <div class="flex flex-col bg-white rounded-3xl overflow-hidden transition-all duration-300">
+          <button @click="toggleSection('edit_profile')" class="flex items-center justify-between w-full p-4 hover:bg-surface-container-low transition-colors text-left group">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <span class="material-symbols-outlined">person</span>
+              </div>
+              <span class="font-body-lg text-body-lg text-on-surface font-semibold">Sunting Profil</span>
             </div>
-            <span class="font-body-lg text-body-lg text-on-surface font-semibold">Sunting Profil</span>
-          </div>
-          <span class="material-symbols-outlined text-text-muted">chevron_right</span>
-        </button>
-        <button class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-surface-container-low transition-colors text-left group">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <span class="material-symbols-outlined">notifications</span>
+            <span class="material-symbols-outlined text-text-muted transition-transform duration-300" :class="{'rotate-90': expandedSection === 'edit_profile'}">chevron_right</span>
+          </button>
+          
+          <div v-if="expandedSection === 'edit_profile'" class="px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
+            <div class="flex flex-col gap-4 mt-2 border-t border-surface-variant pt-4">
+              <div>
+                <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Nama Lengkap</label>
+                <input v-model="editForm.displayName" type="text" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest text-on-surface transition-colors" />
+              </div>
+              <div>
+                <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Tingkat Pendidikan</label>
+                <select v-model="editForm.grade" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest text-on-surface transition-colors">
+                  <option value="Kelas 10">Kelas 10</option>
+                  <option value="Kelas 11">Kelas 11</option>
+                  <option value="Kelas 12">Kelas 12</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+              <button @click="saveProfile" :disabled="savingProfile" class="w-full bg-primary text-white font-bold rounded-xl py-3 mt-1 hover:opacity-90 active:scale-[0.98] transition-all flex justify-center items-center gap-2 disabled:opacity-50">
+                <span v-if="savingProfile" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <span>Simpan Perubahan</span>
+              </button>
+              <p v-if="saveMessage" class="text-success text-xs text-center font-semibold">{{ saveMessage }}</p>
             </div>
-            <span class="font-body-lg text-body-lg text-on-surface font-semibold">Pengaturan Notifikasi</span>
           </div>
-          <span class="material-symbols-outlined text-text-muted">chevron_right</span>
-        </button>
-        <button class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-surface-container-low transition-colors text-left group">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <span class="material-symbols-outlined">help</span>
+        </div>
+        <!-- Pengaturan Notifikasi -->
+        <div class="flex flex-col bg-white rounded-3xl overflow-hidden transition-all duration-300">
+          <button @click="toggleSection('notifications')" class="flex items-center justify-between w-full p-4 hover:bg-surface-container-low transition-colors text-left group">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <span class="material-symbols-outlined">notifications</span>
+              </div>
+              <span class="font-body-lg text-body-lg text-on-surface font-semibold">Pengaturan Notifikasi</span>
             </div>
-            <span class="font-body-lg text-body-lg text-on-surface font-semibold">Pusat Bantuan</span>
+            <span class="material-symbols-outlined text-text-muted transition-transform duration-300" :class="{'rotate-90': expandedSection === 'notifications'}">chevron_right</span>
+          </button>
+          
+          <div v-if="expandedSection === 'notifications'" class="px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
+            <div class="flex flex-col gap-4 mt-2 border-t border-surface-variant pt-4">
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="text-sm text-on-surface-variant font-medium">Notifikasi Modul Baru</span>
+                <input type="checkbox" checked class="form-checkbox rounded text-primary focus:ring-primary h-5 w-5 border-outline-variant/50 transition-colors">
+              </label>
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="text-sm text-on-surface-variant font-medium">Pengingat Belajar Harian</span>
+                <input type="checkbox" checked class="form-checkbox rounded text-primary focus:ring-primary h-5 w-5 border-outline-variant/50 transition-colors">
+              </label>
+            </div>
           </div>
-          <span class="material-symbols-outlined text-text-muted">chevron_right</span>
-        </button>
+        </div>
+        <!-- Pusat Bantuan -->
+        <div class="flex flex-col bg-white rounded-3xl overflow-hidden transition-all duration-300">
+          <button @click="toggleSection('help')" class="flex items-center justify-between w-full p-4 hover:bg-surface-container-low transition-colors text-left group">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <span class="material-symbols-outlined">help</span>
+              </div>
+              <span class="font-body-lg text-body-lg text-on-surface font-semibold">Pusat Bantuan</span>
+            </div>
+            <span class="material-symbols-outlined text-text-muted transition-transform duration-300" :class="{'rotate-90': expandedSection === 'help'}">chevron_right</span>
+          </button>
+          
+          <div v-if="expandedSection === 'help'" class="px-4 pb-4 animate-in slide-in-from-top-2 duration-200">
+            <div class="flex flex-col gap-3 mt-2 border-t border-surface-variant pt-4 bg-surface-container-low rounded-xl p-4">
+              <p class="text-sm text-on-surface-variant leading-relaxed">Punya pertanyaan atau butuh bantuan terkait penggunaan aplikasi SMA Invest?</p>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="material-symbols-outlined text-primary text-[20px]">mail</span>
+                <a href="mailto:support@smainvest.com" class="text-primary font-bold text-sm hover:underline">support@smainvest.com</a>
+              </div>
+            </div>
+          </div>
+        </div>
         <button @click="handleLogout" class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-error-container transition-colors text-left group mt-2 border-t border-surface-variant pt-4">
           <div class="flex items-center gap-4">
             <div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error group-hover:bg-error group-hover:text-white transition-colors">
@@ -100,7 +155,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import MainLayout from '../layouts/MainLayout.vue'
 import { useAuth } from '../composables/useAuth'
@@ -110,7 +165,7 @@ import { useProfile } from '../composables/useProfile'
 const router = useRouter()
 const { user, logout } = useAuth()
 const { modules, fetchModules } = useModules()
-const { profile, fetchProfile, loading: profileLoading } = useProfile()
+const { profile, fetchProfile, updateProfile, loading: profileLoading } = useProfile()
 
 // Using real profile from Supabase now. We provide a default if loading or no profile.
 // The template already uses profile?.display_name etc.
@@ -119,6 +174,56 @@ const completedCount = computed(() => {
   if (!modules.value) return 0;
   return modules.value.filter(m => m.status === 'completed').length;
 })
+
+const expandedSection = ref('')
+const savingProfile = ref(false)
+const saveMessage = ref('')
+
+const editForm = reactive({
+  displayName: '',
+  grade: ''
+})
+
+watch(profile, (newProfile) => {
+  if (newProfile) {
+    editForm.displayName = newProfile.display_name || ''
+    editForm.grade = newProfile.grade || ''
+  }
+})
+
+const toggleSection = (section) => {
+  if (expandedSection.value === section) {
+    expandedSection.value = ''
+  } else {
+    expandedSection.value = section
+    if (section === 'edit_profile' && profile.value) {
+      editForm.displayName = profile.value.display_name || ''
+      editForm.grade = profile.value.grade || ''
+      saveMessage.value = ''
+    }
+  }
+}
+
+const saveProfile = async () => {
+  if (!user.value?.id) return
+  
+  savingProfile.value = true
+  saveMessage.value = ''
+  try {
+    await updateProfile(user.value.id, {
+      display_name: editForm.displayName,
+      grade: editForm.grade
+    })
+    saveMessage.value = 'Profil berhasil diperbarui!'
+    setTimeout(() => {
+      saveMessage.value = ''
+    }, 3000)
+  } catch (error) {
+    console.error('Error saving profile:', error)
+  } finally {
+    savingProfile.value = false
+  }
+}
 
 onMounted(async () => {
   fetchModules()
