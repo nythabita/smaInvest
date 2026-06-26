@@ -37,6 +37,41 @@
         </div>
 
         <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+          <!-- Name Input (Signup Only) -->
+          <div v-if="mode === 'signup'">
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 text-left">Nama Lengkap</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[20px]">person</span>
+              <input 
+                v-model="displayName"
+                type="text" 
+                placeholder="Nama panggilanmu"
+                required
+                class="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest text-on-surface transition-colors"
+              >
+            </div>
+          </div>
+
+          <!-- Grade Select (Signup Only) -->
+          <div v-if="mode === 'signup'">
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 text-left">Tingkat Pendidikan</label>
+            <div class="relative">
+              <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[20px]">school</span>
+              <select 
+                v-model="grade"
+                required
+                class="w-full pl-12 pr-10 py-3 bg-surface-container-low border border-outline-variant/30 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest text-on-surface transition-colors appearance-none"
+              >
+                <option value="" disabled>Pilih kelasmu</option>
+                <option value="Kelas 10">Kelas 10</option>
+                <option value="Kelas 11">Kelas 11</option>
+                <option value="Kelas 12">Kelas 12</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+              <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">expand_more</span>
+            </div>
+          </div>
+
           <!-- Email Input -->
           <div>
             <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 text-left">Email</label>
@@ -103,11 +138,16 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { useProfile } from '../composables/useProfile'
 
 const router = useRouter()
-const { user, loading, loginWithEmail, signUpWithEmail } = useAuth()
+const { user, loading: authLoading, loginWithEmail, signUpWithEmail } = useAuth()
+const { createProfile, loading: profileLoading } = useProfile()
 
+const loading = ref(false)
 const mode = ref('login') // 'login' or 'signup'
+const displayName = ref('')
+const grade = ref('')
 const email = ref('')
 const password = ref('')
 const errorMessage = ref('')
@@ -123,11 +163,14 @@ const toggleMode = () => {
 const clearFields = () => {
   email.value = ''
   password.value = ''
+  displayName.value = ''
+  grade.value = ''
 }
 
 const handleSubmit = async () => {
   errorMessage.value = ''
   successMessage.value = ''
+  loading.value = true
   
   try {
     if (mode.value === 'login') {
@@ -136,6 +179,11 @@ const handleSubmit = async () => {
       router.replace('/dashboard')
     } else {
       const data = await signUpWithEmail(email.value, password.value)
+      
+      if (data?.user) {
+        // Create user profile in Supabase
+        await createProfile(data.user.id, displayName.value, grade.value)
+      }
       
       // If user is auto-confirmed or already has session, redirect.
       // Otherwise, show friendly check-email info message.
@@ -153,6 +201,8 @@ const handleSubmit = async () => {
     }
   } catch (err) {
     errorMessage.value = err.message || 'Terjadi kesalahan. Silakan coba lagi.'
+  } finally {
+    loading.value = false
   }
 }
 

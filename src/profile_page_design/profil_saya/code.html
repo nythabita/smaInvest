@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SMA Invest - Profil Saya</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                            "on-secondary": "#ffffff",
+                            "on-error": "#ffffff",
+                            "on-secondary-fixed-variant": "#234f3f",
+                            "inverse-on-surface": "#ebf3ee",
+                            "background-mint": "#F3FBF6",
+                            "on-secondary-container": "#406b5a",
+                            "inverse-surface": "#2a322f",
+                            "text-muted": "#6B7A70",
+                            "on-tertiary-fixed-variant": "#384b41",
+                            "secondary-fixed": "#beedd7",
+                            "surface-container-high": "#e2eae5",
+                            "outline-variant": "#bec9bf",
+                            "tertiary-fixed": "#d2e8da",
+                            "on-primary": "#ffffff",
+                            "tertiary-fixed-dim": "#b6ccbe",
+                            "on-tertiary": "#ffffff",
+                            "on-surface-variant": "#3f4941",
+                            "primary-fixed": "#9ef5be",
+                            "on-surface": "#161d1a",
+                            "surface-container-low": "#edf5f1",
+                            "error-container": "#ffdad6",
+                            "secondary": "#3b6756",
+                            "on-primary-fixed-variant": "#00522f",
+                            "secondary-container": "#bbead4",
+                            "on-tertiary-fixed": "#0d1f17",
+                            "background": "#f3fbf6",
+                            "surface-dim": "#d4dcd7",
+                            "background-warm": "#F7F5EF",
+                            "secondary-fixed-dim": "#a2d1bb",
+                            "surface-variant": "#dce4e0",
+                            "on-primary-fixed": "#002110",
+                            "success": "#2EAD66",
+                            "warning": "#F5C542",
+                            "on-secondary-fixed": "#002116",
+                            "on-primary-container": "#aeffca",
+                            "on-error-container": "#93000a",
+                            "primary": "#006038",
+                            "white": "#FFFFFF",
+                            "surface-tint": "#066c41",
+                            "primary-fixed-dim": "#82d8a3",
+                            "surface-bright": "#f3fbf6",
+                            "surface-container-highest": "#dce4e0",
+                            "surface": "#f3fbf6",
+                            "error": "#ba1a1a",
+                            "primary-container": "#1f7a4d",
+                            "on-background": "#161d1a",
+                            "surface-container-lowest": "#ffffff",
+                            "tertiary-container": "#5c7065",
+                            "outline": "#6f7a71",
+                            "text-dark": "#10251B",
+                            "inverse-primary": "#82d8a3",
+                            "on-tertiary-container": "#ddf3e5",
+                            "tertiary": "#44584d",
+                            "surface-container": "#e8f0eb"
+                    },
+                    "borderRadius": {
+                            "DEFAULT": "0.25rem",
+                            "lg": "0.5rem",
+                            "xl": "0.75rem",
+                            "full": "9999px",
+                            "2xl": "1rem",
+                            "3xl": "1.5rem",
+                            "4xl": "2rem"
+                    },
+                    "spacing": {
+                            "section-gap-lg": "48px",
+                            "stack-space": "12px",
+                            "section-gap-sm": "16px",
+                            "section-gap-md": "32px",
+                            "page-padding": "20px",
+                            "inline-space": "8px",
+                            "card-padding": "24px"
+                    },
+                    "fontFamily": {
+                            "headline-md": ["Plus Jakarta Sans"],
+                            "headline-sm": ["Plus Jakarta Sans"],
+                            "button-text": ["Plus Jakarta Sans"],
+                            "display-lg-mobile": ["Plus Jakarta Sans"],
+                            "label-md": ["Plus Jakarta Sans"],
+                            "display-lg": ["Plus Jakarta Sans"],
+                            "body-md": ["Plus Jakarta Sans"],
+                            "body-lg": ["Plus Jakarta Sans"],
+                            "title-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                            "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                            "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                            "button-text": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                            "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                            "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                            "title-lg": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                            "headline-md-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "700"}],
+                            "headline-sm-mobile": ["18px", {"lineHeight": "24px", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Hide scrollbar for horizontal scroll areas */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-mint text-on-surface antialiased min-h-screen flex flex-col items-center">
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 bg-background-mint flex justify-between items-center px-page-padding h-16 max-w-[768px] mx-auto z-40">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-full p-2 flex items-center justify-center Active: scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-headline-sm-mobile text-headline-sm-mobile text-primary font-bold">Profil Saya</h1>
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-full p-2 flex items-center justify-center Active: scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-[768px] mx-auto px-page-padding pt-section-gap-sm pb-[100px] flex flex-col gap-section-gap-md">
+<!-- User Header -->
+<section class="flex flex-col items-center gap-stack-space">
+<div class="relative w-24 h-24 rounded-full border-4 border-white shadow-sm overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up portrait of a cheerful high school student with a confident smile, looking directly at the camera. The background is a soft, out-of-focus mint green studio setting. The lighting is bright, natural, and flattering, evoking a modern ed-tech profile picture. The student wears casual, neat clothing suitable for a learning environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHeMxGk1qmcQdGXr73yQ4L8xPcWlNVzvMY89CkCZtyinpNd47c7vuuo6aR4FUVGd-yDA3vtsecWcv-Pv5LH7Ls1vet_wlFk5J_N4Y6AhwXttN6vDopz87Tkmr7E5ueNlEItjI4jZ6ibnhfLtseQzvhv91BpwcBRWPPO8hw-m7Nc-IkEAC6RypnBsRi7aXxze9glUjevPCyziXeB4dofgp7CqUqaxHmjdQzmmsnZtIKABDoWBOL-0n7OR000WfLfGRmL0sedqExG2-8"/>
+</div>
+<div class="text-center">
+<h2 class="font-headline-md-mobile text-headline-md-mobile text-on-surface mb-1">Kiya</h2>
+<p class="font-body-md text-body-md text-text-muted">Kelas 11 | Siswa Investor</p>
+</div>
+</section>
+<!-- Stats Grid -->
+<section class="grid grid-cols-2 gap-inline-space">
+<div class="bg-white rounded-3xl p-4 flex flex-col items-center justify-center border border-surface-variant shadow-[0px_4px_20px_rgba(16,37,27,0.05)]">
+<span class="material-symbols-outlined text-primary mb-2 text-[28px]" data-icon="menu_book" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-headline-sm-mobile text-headline-sm-mobile text-on-surface">5 Modul</span>
+<span class="font-label-md text-label-md text-text-muted mt-1">Diselesaikan</span>
+</div>
+<div class="bg-white rounded-3xl p-4 flex flex-col items-center justify-center border border-surface-variant shadow-[0px_4px_20px_rgba(16,37,27,0.05)]">
+<span class="material-symbols-outlined text-warning mb-2 text-[28px]" data-icon="local_fire_department" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-headline-sm-mobile text-headline-sm-mobile text-on-surface">1.250 XP</span>
+<span class="font-label-md text-label-md text-text-muted mt-1">Total Poin</span>
+</div>
+</section>
+<!-- Achievements Section -->
+<section class="flex flex-col gap-stack-space">
+<h3 class="font-title-lg text-title-lg text-on-surface">Pencapaian</h3>
+<div class="flex overflow-x-auto hide-scrollbar gap-inline-space pb-2 -mx-page-padding px-page-padding">
+<!-- Badge 1 -->
+<div class="flex-none w-28 bg-secondary-container rounded-3xl p-4 flex flex-col items-center justify-center border border-secondary-fixed">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="flag" style="font-variation-settings: 'FILL' 1;">flag</span>
+</div>
+<span class="font-label-md text-label-md text-on-secondary-container text-center">Pionir</span>
+</div>
+<!-- Badge 2 -->
+<div class="flex-none w-28 bg-secondary-container rounded-3xl p-4 flex flex-col items-center justify-center border border-secondary-fixed">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="emoji_events" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<span class="font-label-md text-label-md text-on-secondary-container text-center">Ahli Kuis</span>
+</div>
+<!-- Badge 3 -->
+<div class="flex-none w-28 bg-secondary-container rounded-3xl p-4 flex flex-col items-center justify-center border border-secondary-fixed">
+<div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-2 shadow-sm">
+<span class="material-symbols-outlined text-primary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<span class="font-label-md text-label-md text-on-secondary-container text-center">Disiplin</span>
+</div>
+<!-- Locked Badge -->
+<div class="flex-none w-28 bg-surface-container-high rounded-3xl p-4 flex flex-col items-center justify-center border border-surface-variant opacity-60">
+<div class="w-12 h-12 rounded-full bg-surface flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-text-muted" data-icon="lock">lock</span>
+</div>
+<span class="font-label-md text-label-md text-text-muted text-center">Misteri</span>
+</div>
+</div>
+</section>
+<!-- Menu List -->
+<section class="flex flex-col gap-2 bg-white rounded-4xl p-2 border border-surface-variant shadow-[0px_4px_20px_rgba(16,37,27,0.05)]">
+<button class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-surface-container-low transition-colors text-left group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">Sunting Profil</span>
+</div>
+<span class="material-symbols-outlined text-text-muted" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-surface-container-low transition-colors text-left group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">Pengaturan Notifikasi</span>
+</div>
+<span class="material-symbols-outlined text-text-muted" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-surface-container-low transition-colors text-left group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-background-mint flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</div>
+<span class="font-body-lg text-body-lg text-on-surface font-semibold">Pusat Bantuan</span>
+</div>
+<span class="material-symbols-outlined text-text-muted" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="flex items-center justify-between w-full p-4 rounded-3xl hover:bg-error-container transition-colors text-left group mt-2 border-t border-surface-variant pt-4">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-error-container flex items-center justify-center text-error group-hover:bg-error group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</div>
+<span class="font-body-lg text-body-lg text-error font-semibold">Keluar</span>
+</div>
+</button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full z-50 flex justify-around items-center px-2 py-3 pb-safe max-w-[768px] bg-surface-container-lowest border-t-0 shadow-[0px_-4px_20px_rgba(16,37,27,0.05)] rounded-t-xl md:hidden">
+<!-- Beranda (Inactive) -->
+<a class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-all flex-1 py-2" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-md text-label-md">Beranda</span>
+</a>
+<!-- Materi (Inactive) -->
+<a class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-all flex-1 py-2" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="menu_book">menu_book</span>
+<span class="font-label-md text-label-md">Materi</span>
+</a>
+<!-- Peringkat (Inactive) -->
+<a class="flex flex-col items-center justify-center text-text-muted hover:text-primary transition-all flex-1 py-2" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="leaderboard">leaderboard</span>
+<span class="font-label-md text-label-md">Peringkat</span>
+</a>
+<!-- Profil (Active) -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-2 flex-1 scale-110 duration-200 shadow-sm" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-md text-label-md">Profil</span>
+</a>
+</nav>
+<!-- Safe area padding for iOS -->
+<style>
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 1rem);
+        }
+    </style>
+</body></html>

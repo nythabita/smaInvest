@@ -6,6 +6,7 @@ import DashboardPage from '../pages/DashboardPage.vue'
 import ModuleListPage from '../pages/ModuleListPage.vue'
 import ModuleDetailPage from '../pages/ModuleDetailPage.vue'
 import QuizPage from '../pages/QuizPage.vue'
+import ProfilePage from '../pages/ProfilePage.vue'
 import { useAuth } from '../composables/useAuth'
 
 const routes = [
@@ -41,6 +42,12 @@ const routes = [
     path: '/quiz/:moduleId',
     name: 'Quiz',
     component: QuizPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfilePage,
     meta: { requiresAuth: true }
   }
 ]

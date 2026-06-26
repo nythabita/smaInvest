@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Profile - SMA Invest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#234f3f",
+                      "inverse-on-surface": "#ebf3ee",
+                      "background-mint": "#F3FBF6",
+                      "on-secondary-container": "#406b5a",
+                      "inverse-surface": "#2a322f",
+                      "text-muted": "#6B7A70",
+                      "on-tertiary-fixed-variant": "#384b41",
+                      "secondary-fixed": "#beedd7",
+                      "surface-container-high": "#e2eae5",
+                      "outline-variant": "#bec9bf",
+                      "tertiary-fixed": "#d2e8da",
+                      "on-primary": "#ffffff",
+                      "tertiary-fixed-dim": "#b6ccbe",
+                      "on-tertiary": "#ffffff",
+                      "on-surface-variant": "#3f4941",
+                      "primary-fixed": "#9ef5be",
+                      "on-surface": "#161d1a",
+                      "surface-container-low": "#edf5f1",
+                      "error-container": "#ffdad6",
+                      "secondary": "#3b6756",
+                      "on-primary-fixed-variant": "#00522f",
+                      "secondary-container": "#bbead4",
+                      "on-tertiary-fixed": "#0d1f17",
+                      "background": "#f3fbf6",
+                      "surface-dim": "#d4dcd7",
+                      "background-warm": "#F7F5EF",
+                      "secondary-fixed-dim": "#a2d1bb",
+                      "surface-variant": "#dce4e0",
+                      "on-primary-fixed": "#002110",
+                      "success": "#2EAD66",
+                      "warning": "#F5C542",
+                      "on-secondary-fixed": "#002116",
+                      "on-primary-container": "#aeffca",
+                      "on-error-container": "#93000a",
+                      "primary": "#006038",
+                      "white": "#FFFFFF",
+                      "surface-tint": "#066c41",
+                      "primary-fixed-dim": "#82d8a3",
+                      "surface-bright": "#f3fbf6",
+                      "surface-container-highest": "#dce4e0",
+                      "surface": "#f3fbf6",
+                      "error": "#ba1a1a",
+                      "primary-container": "#1f7a4d",
+                      "on-background": "#161d1a",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#5c7065",
+                      "outline": "#6f7a71",
+                      "text-dark": "#10251B",
+                      "inverse-primary": "#82d8a3",
+                      "on-tertiary-container": "#ddf3e5",
+                      "tertiary": "#44584d",
+                      "surface-container": "#e8f0eb"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap-lg": "48px",
+                      "stack-space": "12px",
+                      "section-gap-sm": "16px",
+                      "section-gap-md": "32px",
+                      "page-padding": "20px",
+                      "inline-space": "8px",
+                      "card-padding": "24px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "button-text": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "title-lg": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "button-text": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background-mint text-on-surface font-body-md antialiased flex h-screen overflow-hidden">
+<!-- SideNavBar (Shared Component) -->
+<nav class="bg-surface dark:bg-inverse-surface fixed left-0 top-0 h-full w-64 bg-surface-container-low dark:bg-surface-container-high flat no shadows translate-x-1 duration-200 flex flex-col h-full py-8 px-4 hidden md:flex z-50">
+<div class="mb-10 flex flex-col items-center">
+<img class="w-16 h-16 rounded-full mb-4 object-cover" data-alt="A clean, modern profile picture of a high school student in a light studio setting, soft lighting, professional yet approachable vibe, minimalist background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6yqndlYs7ieAoXhDpzBFBnK-Ra39Qguii3PCb8hsjr25ffhAk6JsBZDFzWvpZSdI_PEPfkgCTx2C7xVoYZP8RyDh4OvxqVblrX_ug05MXlLMX57kjAbf7Q0YWCn-TKTTvFyYJYN1XHuz1fk_054ySyGZtB6e5YS20HXsUnGqSW1_QSOG-QuUrrDJbi9VlGS3ynv-wW_K086V5Lh2tH05BBo658yNXBcoeAXlL-VW5NDUmonlH--Zgs1nvuRh8YXGSaOWewTfbU6Le"/>
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim text-center">Welcome back</h2>
+<p class="font-body-md text-body-md text-text-muted mt-1 text-center">Future Investor</p>
+</div>
+<ul class="flex flex-col gap-2 flex-grow">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">dashboard</span>
+<span class="font-title-lg text-title-lg group-hover:text-primary transition-colors">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">menu_book</span>
+<span class="font-title-lg text-title-lg group-hover:text-primary transition-colors">Lessons</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">account_balance_wallet</span>
+<span class="font-title-lg text-title-lg group-hover:text-primary transition-colors">Portfolio</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant dark:text-surface-variant hover:bg-surface-container dark:hover:bg-surface-container-highest transition-all group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">ads_click</span>
+<span class="font-title-lg text-title-lg group-hover:text-primary transition-colors">Goals</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-container dark:bg-surface-container-highest text-primary dark:text-primary-fixed-dim font-bold transition-all" href="#">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="font-title-lg text-title-lg">Settings</span>
+</a>
+</li>
+</ul>
+<div class="mt-auto">
+<button class="w-full py-3 px-4 bg-primary text-white rounded-full font-button-text text-button-text hover:bg-surface-tint transition-colors">
+                Upgrade to Pro
+            </button>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-0 md:ml-64 h-full overflow-y-auto overflow-x-hidden p-page-padding md:p-section-gap-md max-w-[1200px] mx-auto w-full">
+<!-- Header -->
+<header class="mb-section-gap-md animate-fade-in">
+<h1 class="font-display-lg text-display-lg text-text-dark mb-2">Profil Kamu</h1>
+<p class="font-body-lg text-body-lg text-text-muted">Level 5 Investor • 2,450 XP</p>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-section-gap-md animate-slide-up" style="animation-delay: 0.1s;">
+<!-- Left Column: Profile Card & Settings -->
+<div class="lg:col-span-4 flex flex-col gap-section-gap-sm">
+<!-- Profile Card -->
+<div class="bg-surface-container-lowest rounded-[24px] p-card-padding border border-outline-variant/30 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-secondary-fixed to-primary-fixed-dim opacity-40"></div>
+<div class="relative z-10 flex flex-col items-center text-center mt-8">
+<div class="relative">
+<img class="w-24 h-24 rounded-full object-cover border-4 border-surface-container-lowest shadow-md" data-alt="Close up portrait of a young student, looking confident, soft warm lighting, soft green background, highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFpvDL7nOFTuz3hDOZ20AM9uOnv4vOiL5Xn_pOy53K03pPOEC51uVSVmEr-pWj2qeQsAZTlEFUVJC3oOz0e76wWuQGPxOrCaUQ_oBnGBodDStsw2AGydJqgX9igAfsssAQKjBgJq4XVOXfnaungNPWtj9UTIYK6sB-9NX5_9OpnQW-abjEcbjMCEBRRJVX6sh_WS1oRewy6O5UpMGYfVuJ29Q64NK_t-IWc_wY5PPg3oqNi1takcYxYWwfZRfWV1S-bPyX3aYe7MZg"/>
+<button class="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-sm hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+</button>
+</div>
+<h3 class="font-headline-md text-headline-md text-text-dark mt-4">Kiya</h3>
+<p class="font-body-md text-body-md text-text-muted mt-1">kiya.student@sma-invest.id</p>
+<div class="inline-flex items-center gap-1.5 bg-surface-container-high px-3 py-1 rounded-full mt-4">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">school</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Kelas 11 IPA</span>
+</div>
+</div>
+</div>
+<!-- Account Settings Minimal -->
+<div class="bg-surface-container-lowest rounded-[24px] p-card-padding border border-outline-variant/30 shadow-sm">
+<h4 class="font-title-lg text-title-lg text-text-dark mb-4">Pengaturan Akun</h4>
+<div class="flex flex-col gap-3">
+<button class="flex items-center justify-between w-full py-2 px-3 hover:bg-surface-container-low rounded-lg transition-colors text-left group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary transition-colors">lock</span>
+<span class="font-body-md text-body-md text-on-surface">Ubah Password</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</button>
+<button class="flex items-center justify-between w-full py-2 px-3 hover:bg-surface-container-low rounded-lg transition-colors text-left group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary transition-colors">notifications</span>
+<span class="font-body-md text-body-md text-on-surface">Notifikasi</span>
+</div>
+<span class="material-symbols-outlined text-outline-variant">chevron_right</span>
+</button>
+<button class="flex items-center justify-between w-full py-2 px-3 hover:bg-error-container rounded-lg transition-colors text-left group mt-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error">logout</span>
+<span class="font-body-md text-body-md text-error font-medium">Keluar</span>
+</div>
+</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Stats & Achievements -->
+<div class="lg:col-span-8 flex flex-col gap-section-gap-md">
+<!-- Stats Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-section-gap-sm">
+<!-- Progress Card -->
+<div class="bg-[#DFF5E7] rounded-[24px] p-card-padding flex flex-col justify-between h-full relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-6">
+<h4 class="font-title-lg text-title-lg text-primary-container">Progress Belajar</h4>
+<span class="material-symbols-outlined text-primary-container opacity-50" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<div class="mb-2 flex justify-between items-end">
+<span class="font-headline-sm text-headline-sm text-text-dark">65%</span>
+<span class="font-label-md text-label-md text-primary-container mb-1">ke Level 6</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-white/50 rounded-full h-2.5 overflow-hidden">
+<div class="bg-primary h-2.5 rounded-full" style="width: 65%"></div>
+</div>
+<p class="font-body-md text-body-md text-primary-container mt-4 opacity-80">Kamu butuh 550 XP lagi untuk naik level.</p>
+</div>
+</div>
+<!-- Completed Modules -->
+<div class="bg-surface-container-lowest rounded-[24px] p-card-padding border border-outline-variant/30 shadow-sm flex flex-col justify-between">
+<div class="flex justify-between items-start mb-6">
+<h4 class="font-title-lg text-title-lg text-text-dark">Modul Selesai</h4>
+<div class="bg-secondary-container p-2 rounded-full">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-display-lg text-display-lg text-text-dark">12</span>
+<span class="font-body-md text-body-md text-text-muted">/ 24 Modul</span>
+</div>
+<p class="font-body-md text-body-md text-success mt-2 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+                            3 diselesaikan minggu ini
+                        </p>
+</div>
+</div>
+<!-- Achievements Card -->
+<div class="bg-surface-container-lowest rounded-[24px] p-card-padding border border-outline-variant/30 shadow-sm animate-slide-up" style="animation-delay: 0.2s;">
+<div class="flex justify-between items-center mb-6">
+<h4 class="font-headline-sm text-headline-sm text-text-dark">Pencapaian (Badges)</h4>
+<button class="font-button-text text-button-text text-primary hover:underline">Lihat Semua</button>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Badge 1 -->
+<div class="flex flex-col items-center text-center p-4 rounded-xl hover:bg-surface-container-low transition-colors group cursor-default">
+<div class="w-16 h-16 bg-[#FFF4D9] rounded-full flex items-center justify-center mb-3 border-2 border-[#FFE082] group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[#F5B041] text-[32px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<h5 class="font-title-lg text-title-lg text-text-dark text-[14px]">Pemula Rajin</h5>
+<p class="font-label-md text-label-md text-text-muted mt-1 font-normal">Login 7 hari beruntun</p>
+</div>
+<!-- Badge 2 -->
+<div class="flex flex-col items-center text-center p-4 rounded-xl hover:bg-surface-container-low transition-colors group cursor-default">
+<div class="w-16 h-16 bg-[#E3F2FD] rounded-full flex items-center justify-center mb-3 border-2 border-[#90CAF9] group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[#3498DB] text-[32px]" style="font-variation-settings: 'FILL' 1;">savings</span>
+</div>
+<h5 class="font-title-lg text-title-lg text-text-dark text-[14px]">Ahli Nabung</h5>
+<p class="font-label-md text-label-md text-text-muted mt-1 font-normal">Selesai Modul 1</p>
+</div>
+<!-- Badge 3 -->
+<div class="flex flex-col items-center text-center p-4 rounded-xl hover:bg-surface-container-low transition-colors group cursor-default">
+<div class="w-16 h-16 bg-[#E8F5E9] rounded-full flex items-center justify-center mb-3 border-2 border-[#A5D6A7] group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[#2ECC71] text-[32px]" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+</div>
+<h5 class="font-title-lg text-title-lg text-text-dark text-[14px]">Investor Cilik</h5>
+<p class="font-label-md text-label-md text-text-muted mt-1 font-normal">Simulasi Saham 1x</p>
+</div>
+<!-- Badge 4 (Locked) -->
+<div class="flex flex-col items-center text-center p-4 rounded-xl opacity-50 grayscale cursor-not-allowed">
+<div class="w-16 h-16 bg-surface-variant rounded-full flex items-center justify-center mb-3">
+<span class="material-symbols-outlined text-outline text-[32px]">lock</span>
+</div>
+<h5 class="font-title-lg text-title-lg text-text-dark text-[14px]">Master Saham</h5>
+<p class="font-label-md text-label-md text-text-muted mt-1 font-normal">Selesai Modul 5</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        .animate-slide-up {
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+    </style>
+</body></html>

@@ -1,24 +1,7 @@
 <template>
-  <div class="bg-background text-on-background font-body-md font-sans min-h-screen flex flex-col md:items-center">
-    <!-- TopAppBar (Visible on Desktop, hidden on mobile for BottomNav layout) -->
-    <header class="hidden md:flex justify-between items-center px-page-padding h-16 w-full max-w-[768px] mx-auto bg-background dark:bg-on-background fixed top-0 z-50">
-      <div class="flex items-center gap-3 cursor-pointer" @click="navigateTo('/dashboard')">
-        <span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">account_balance</span>
-        <span class="font-display-lg-mobile text-display-lg-mobile font-extrabold text-primary dark:text-primary-fixed">SMA Invest</span>
-      </div>
-      <nav class="flex items-center gap-6">
-        <button class="text-primary font-bold active:scale-95 transition-transform" @click="navigateTo('/dashboard')">Home</button>
-        <button class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-3 py-2 rounded-lg" @click="navigateTo('/modules')">Modules</button>
-      </nav>
-      <div>
-        <button class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center overflow-hidden hover:opacity-85 active:scale-95 transition-all" @click="handleLogout" title="Log Out">
-          <span class="material-symbols-outlined text-on-surface-variant">logout</span>
-        </button>
-      </div>
-    </header>
-
+  <MainLayout>
     <!-- Main Content Area -->
-    <main class="flex-1 w-full max-w-[768px] mx-auto px-page-padding pt-6 pb-24 md:pt-24 flex flex-col gap-section-gap-md">
+    <main class="flex-1 w-full max-w-[768px] mx-auto px-page-padding pt-6 md:pt-24 flex flex-col gap-section-gap-md">
       <!-- Welcome Section -->
       <section class="flex flex-col gap-inline-space">
         <h1 class="font-display-lg-mobile text-display-lg-mobile text-primary">Hi, {{ user?.email ? user.email.split('@')[0] : 'Kiya' }}! 👋</h1>
@@ -114,23 +97,7 @@
         </div>
       </section>
     </main>
-
-    <!-- BottomNavBar (Mobile Only) -->
-    <nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center bg-surface dark:bg-inverse-surface px-2 py-3 pb-safe shadow-[0px_-4px_20px_rgba(16,37,27,0.05)] rounded-t-xl">
-      <button class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 active:scale-90 transition-transform" @click="navigateTo('/dashboard')">
-        <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">home</span>
-        <span class="font-label-md text-[10px] mt-1 font-semibold">Home</span>
-      </button>
-      <button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:opacity-80 active:scale-90 transition-transform px-4 py-1" @click="navigateTo('/modules')">
-        <span class="material-symbols-outlined text-[24px]">menu_book</span>
-        <span class="font-label-md text-[10px] mt-1">Modules</span>
-      </button>
-      <button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant hover:opacity-80 active:scale-90 transition-transform px-4 py-1" @click="navigateTo('/login')">
-        <span class="material-symbols-outlined text-[24px]">person</span>
-        <span class="font-label-md text-[10px] mt-1">Profile</span>
-      </button>
-    </nav>
-  </div>
+  </MainLayout>
 </template>
 
 <script setup>
@@ -138,6 +105,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useModules } from '../composables/useModules'
 import { useAuth } from '../composables/useAuth'
+import MainLayout from '../layouts/MainLayout.vue'
 
 const router = useRouter()
 const { modules: allModules, fetchModules } = useModules()
