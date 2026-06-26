@@ -2,10 +2,14 @@ import { ref } from 'vue'
 import { supabase } from '../supabase/client'
 import { useAuth } from './useAuth'
 
+const globalProfile = ref(null)
+const globalLoading = ref(false)
+const globalError = ref(null)
+
 export function useProfile() {
-  const profile = ref(null)
-  const loading = ref(false)
-  const error = ref(null)
+  const profile = globalProfile
+  const loading = globalLoading
+  const error = globalError
 
   const fetchProfile = async (userId) => {
     loading.value = true
@@ -66,8 +70,7 @@ export function useProfile() {
     try {
       const { data, error: err } = await supabase
         .from('user_profiles')
-        .update(updates)
-        .eq('id', userId)
+        .upsert({ id: userId, ...updates })
         .select()
         .single()
         

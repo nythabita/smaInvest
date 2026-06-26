@@ -220,6 +220,7 @@ const saveProfile = async () => {
     }, 3000)
   } catch (error) {
     console.error('Error saving profile:', error)
+    saveMessage.value = 'Gagal: ' + (error.message || 'Pastikan tabel Supabase sudah dibuat.')
   } finally {
     savingProfile.value = false
   }

@@ -4,7 +4,7 @@
     <main class="flex-1 w-full max-w-[768px] mx-auto px-page-padding pt-6 md:pt-24 flex flex-col gap-section-gap-md">
       <!-- Welcome Section -->
       <section class="flex flex-col gap-inline-space">
-        <h1 class="font-display-lg-mobile text-display-lg-mobile text-primary">Hi, {{ user?.email ? user.email.split('@')[0] : 'Kiya' }}! 👋</h1>
+        <h1 class="font-display-lg-mobile text-display-lg-mobile text-primary">Hi, {{ profile?.display_name || user?.email?.split('@')[0] || 'Kiya' }}! 👋</h1>
         <p class="font-body-lg text-body-lg text-on-surface-variant">Siap untuk belajar investasi hari ini?</p>
       </section>
 
@@ -105,14 +105,19 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useModules } from '../composables/useModules'
 import { useAuth } from '../composables/useAuth'
+import { useProfile } from '../composables/useProfile'
 import MainLayout from '../layouts/MainLayout.vue'
 
 const router = useRouter()
 const { modules: allModules, fetchModules } = useModules()
 const { user, logout } = useAuth()
+const { profile, fetchProfile } = useProfile()
 
-onMounted(() => {
+onMounted(async () => {
   fetchModules()
+  if (user.value?.id) {
+    await fetchProfile(user.value.id)
+  }
 })
 
 const modules = computed(() => (allModules.value || []).slice(0, 3))
